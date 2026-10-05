@@ -41,6 +41,7 @@ Human: skim this file when writing the paper/portfolio narrative. Agents: update
 - SGS hill-climb 20-co medium digs (measurement probe): `outputs/stage2/test_runs/sgs_hillclimb_20_medium/`
 - SGS 5-co low-scout A/B smoke (measurement; later locked as default): `outputs/stage2/test_runs/sgs_smoke_5co_low_scouts/`
 - Agent rule: `.cursor/rules/decision-log.mdc`
+- Portfolio hygiene plan, pr-1 through pr-14, README only in pr-14: `docs/portfolio-hygiene-plan.md`
 - Stage 3 verification plan: `.cursor/plans/phase-2-stage3-verification.plan.md`
 - Stage 3 bulletproof plan: `.cursor/plans/bulletproof-citation-verifier.plan.md`
 - Stage 3 package: `citation_verification/` (production; not under `evals/`)
@@ -55,8 +56,6 @@ Human: skim this file when writing the paper/portfolio narrative. Agents: update
 - Frozen March dump for panel rebuilds (local, not in git): `evals/references/march_2026_production.jsonl`
 - Production batch runner: `production/` (`python -m production {run,dry-run,status,dedupe,verify}`)
 - Production writes (local, gitignored): `outputs/prod/{sgs,pcs,uas}/`
-- Public schema samples (fictional): `crunchbase_data/sample/`, `outputs/prod/sample/`
-- Data inventory: `docs/DATA.md`
 - Public schema samples (fictional): `crunchbase_data/sample/`, `outputs/prod/sample/`
 - Data inventory: `docs/DATA.md`
 - Production verify branch: `prod-verifier` (worktree `deep-research-AI-agent-verifier`)
@@ -1547,3 +1546,17 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 **Alternatives rejected:** Copying 20 real Crunchbase rows into the sample (still republishes licensed records). Deleting `legacy_agent_march_2026/`. Gitignoring eval `summary.jsonl` (those are small measurement evidence, not the licensed dump). Rewriting git history in this pass.
 
 **Open follow-ups:** History still contains the old blobs. Ask Jan before any `git filter-repo`. README rewrite later.
+
+---
+
+## 2026-10-05: Portfolio hygiene plan recorded
+
+**Decision:** The cleanup sequence before the root README rewrite is `docs/portfolio-hygiene-plan.md`. Fourteen pull requests, pr-1 through pr-14. pr-14 is the only edit to `README.md`. Execution has not started.
+
+**Why:** The root README still describes the March 2026 pipeline. The live batch command is `python -m production`. One cleanup diff would mix a YAML deletion, a shared Perplexity client, and the README.
+
+**Evidence:** `docs/portfolio-hygiene-plan.md`. The plan checker reported 14 PR sections and 0 problems on this copy.
+
+**Alternatives rejected:** One pull request for the whole cleanup. Rewriting `README.md` first. Deleting `legacy_agent_march_2026/`. Changing `DEFAULT_WEB_SEARCH_DEPTH` from `low` to `medium`. A history rewrite of the old Crunchbase CSV.
+
+**Open follow-ups:** Start pr-1 only after an explicit go. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.
