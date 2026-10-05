@@ -39,6 +39,7 @@ Human: skim this file when writing the paper/portfolio narrative. Agents: update
 - SGS 5-co low-scout A/B smoke (measurement; later locked as default): `outputs/stage2/test_runs/sgs_smoke_5co_low_scouts/`
 - Agent rule: `.cursor/rules/decision-log.mdc`
 - Agent brief: `AGENTS.md`
+- Portfolio readme: `README.md`
 - Packaging: `pyproject.toml`, `.github/workflows/pytest.yml`
 - API keys: `src/keys.py`
 - Perplexity client: `agent_api/client.py`
@@ -1626,3 +1627,17 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 **Alternatives rejected:** Leaving the thirteen scripts. Folding the probes into `python -m production`. Deleting `summary.jsonl`.
 
 **Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`. Do not pass `--live` unless Khaled asks.
+
+---
+
+## 2026-10-05: README describes the live commands
+
+**Decision:** `README.md` describes `python -m production`, default architecture `sgs`, citation checks through `python -m production verify` and `python -m citation_verification`, and an SGS planning band of about $0.16 per company. The March 2026 run stays labeled as that run. It produced 2,062 findings. The dashboard is `legacy_agent_march_2026/presentation/production_results.html`. An unread citation page stays null.
+
+**Why:** The old readme still told a reader to run the eval stub commands and to treat the March unit cost as the current one.
+
+**Evidence:** `README.md`. `tests/test_readme.py`.
+
+**Alternatives rejected:** Rewriting the readme before the tree matched it. Putting a license file in this pull request.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.
