@@ -54,9 +54,8 @@ outputs/**/*.html
 outputs/**/latest
 !outputs/.gitkeep
 !outputs/evals/runs/.gitkeep
-# Paid Stage 2 runners and scoreboards stay in git. Per-company traces stay
-# on disk only so clones do not carry hundreds of Agent JSON dumps.
-!outputs/stage2/test_runs/**/*.py
+# Paid Stage 2 scoreboards stay in git. Per-company traces stay local.
+# The runner is evals/paid_probes.py.
 !outputs/stage2/test_runs/**/summary.jsonl
 logs/*.log
 checkpoints/*.json
