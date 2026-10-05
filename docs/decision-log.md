@@ -1675,6 +1675,8 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 
 ## 2026-10-05: Remove the March deep-research agent
 
+**Status:** the `src/stage_2/` pointer is superseded by [[2026-10-05: Remove the src/stage_2 pointer]].
+
 **Decision:** Delete `legacy_agent_march_2026/`. The portfolio tree keeps `signal_gated_search`, `parallel_channel_search`, and `unified_adaptive_search`. `src/stage_2/` still exits, and the message names `python -m production`. Unified Adaptive Search still loads `prompts/stage_2_perplexity_prompt.txt`. Panel rebuilds still read local `evals/references/march_2026_production.jsonl`. Git history is unchanged.
 
 **Why:** Khaled asked to remove the first agent. That folder was the March Perplexity `deep-research` batch runner, parked on 2026-08-16 and still present. The three later architectures are the live batch.
@@ -1696,5 +1698,19 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 **Evidence:** `README.md`. `AGENTS.md`. `src/stage_1/__init__.py`. `citation_verification/__init__.py`.
 
 **Alternatives rejected:** Renaming `src/stage_1/` to a new package. Moving the research agents under `src/`.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.
+
+---
+
+## 2026-10-05: Remove the src/stage_2 pointer
+
+**Decision:** Delete `src/stage_2/` and `src/tests/stage_2/`. Those modules only exited and named `python -m production`. The research agents stay `signal_gated_search`, `parallel_channel_search`, and `unified_adaptive_search`.
+
+**Why:** Khaled said the stage 2 folder should have gone with the March agent. After that agent was deleted, the pointer had no runner to point at.
+
+**Evidence:** `tests/test_march_reference_path.py`. `AGENTS.md`.
+
+**Alternatives rejected:** Leaving the exit stubs so the old module path still prints a message.
 
 **Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.

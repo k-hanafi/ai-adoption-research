@@ -18,27 +18,15 @@ def test_march_jsonl_is_evals_reference_not_legacy_folder() -> None:
     assert "legacy_agent_march_2026" not in str(MARCH_STAGE2_JSONL)
 
 
-def _assert_moved_exit(main) -> None:
-    try:
-        main()
-    except SystemExit as exc:
-        message = str(exc)
-    else:
-        raise AssertionError("retired March command must exit instead of calling the API")
-    assert "python -m production" in message
-    assert "legacy_agent_march_2026" not in message
-
-
-def test_live_march_runner_command_explains_the_move() -> None:
-    from src.stage_2.production_agent_runner import main
-
-    _assert_moved_exit(main)
-
-
-def test_live_march_preset_command_explains_the_move() -> None:
-    from src.tests.stage_2.run_preset_test import main
-
-    _assert_moved_exit(main)
+def test_march_runner_pointer_is_gone() -> None:
+    assert not (PROJECT_ROOT / "src" / "stage_2").exists()
+    assert not (PROJECT_ROOT / "src" / "tests" / "stage_2").exists()
+    tracked = subprocess.check_output(
+        ["git", "ls-files", "src/stage_2", "src/tests"],
+        cwd=PROJECT_ROOT,
+        text=True,
+    )
+    assert tracked == ""
 
 
 def test_live_python_does_not_import_march_snapshot() -> None:
