@@ -25,30 +25,39 @@ _GONE = (
 )
 
 
+def _instance_tree() -> list[str]:
+    root = ROOT / "evals" / "instances"
+    if not root.exists():
+        return []
+    return sorted(
+        str(path.relative_to(root))
+        for path in root.rglob("*")
+        if path.is_file()
+    )
+
+
 def test_run_benchmarks_exits_without_an_instance(capsys) -> None:
-    before = set((ROOT / "evals" / "instances").glob("benchmark/**"))
-    code = main(["run-benchmarks", "sgs", "--live"])
+    before = _instance_tree()
+    code = main(["run-benchmarks"])
     captured = capsys.readouterr()
-    after = set((ROOT / "evals" / "instances").glob("benchmark/**"))
     assert code == 2
     assert captured.out == ""
     assert "bake-off was skipped" in captured.err
     assert "python -m production verify" in captured.err
     assert "python -m citation_verification" in captured.err
-    assert before == after
+    assert _instance_tree() == before
 
 
 def test_run_verification_exits_without_an_instance(capsys) -> None:
-    before = set((ROOT / "evals" / "instances").glob("verification/**"))
+    before = _instance_tree()
     code = main(["run-verification"])
     captured = capsys.readouterr()
-    after = set((ROOT / "evals" / "instances").glob("verification/**"))
     assert code == 2
     assert captured.out == ""
     assert "bake-off was skipped" in captured.err
     assert "python -m production verify" in captured.err
     assert "python -m citation_verification" in captured.err
-    assert before == after
+    assert _instance_tree() == before
 
 
 def test_removed_files_are_gone() -> None:
@@ -80,5 +89,6 @@ def test_unread_knobs_are_gone() -> None:
 def test_agents_md_names_the_live_command() -> None:
     text = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
     assert "python -m production" in text
+    assert "default architecture is `sgs`" in text
     assert "legacy_agent_march_2026" in text
     assert "python -m pytest -q" in text

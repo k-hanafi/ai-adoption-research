@@ -54,31 +54,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="Paid UAS matrix (metered Agent API; requires key; dry is default)",
     )
 
-    bench_p = sub.add_parser(
+    sub.add_parser(
         "run-benchmarks",
         help="Exit 2. The bake-off was skipped.",
     )
-    bench_p.add_argument("architecture", help=_architecture_help())
-    bench_p.add_argument(
-        "--live",
-        action="store_true",
-        help="Mark instance as live (paid path not wired yet)",
-    )
-
-    ver_p = sub.add_parser(
+    sub.add_parser(
         "run-verification",
         help="Exit 2. Citation checks use production verify.",
-    )
-    ver_p.add_argument(
-        "architecture",
-        nargs="?",
-        default=None,
-        help="Optional architecture key/alias for metadata",
-    )
-    ver_p.add_argument(
-        "--live",
-        action="store_true",
-        help="Mark instance as live (paid path not wired yet)",
     )
 
     diag_p = sub.add_parser(

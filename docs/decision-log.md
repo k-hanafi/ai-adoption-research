@@ -1160,6 +1160,8 @@ Second fetch order: **superseded by [[2026-08-15: Tavily Extract is the only pai
 - A fourth competing Stage 2 architecture identity (Stage 3 is arch-agnostic verification, not a research strategy)
 - Separate eval-only and prod-only judges (drift risk)
 
+**Status:** The package home is still current. The follow-up that wires `python -m evals run-verification` is superseded by [[2026-10-05: Drop unused eval stubs and unread knobs]].
+
 **Open follow-ups:** Implement `citation_verification/` (fetch + OpenAI logprob judge); wire `python -m evals run-verification` as a consumer; retire or thin-wrap `evals/hooks/stage3_judge.py`.
 
 ---
@@ -1191,7 +1193,7 @@ Second fetch order: **superseded by [[2026-08-15: Tavily Extract is the only pai
 - [x] CLI `--live` entrypoint for one-company smoke
 - [x] Tiny paid smoke to confirm 3× metered cost ≈ projection (Jam `$0.070`)
 - [x] Optional Stage B-style probe: PCS 3× high on the 20-co hill-climb panel (mean $0.165, not a default lock; see [[2026-08-14: PCS 20-co 3× high cost probe]])
-- [x] Lock UAS **bake-off** knobs: `reasoning_effort=xhigh` in package default + `evals/configs/unified_adaptive_search.yaml` (see [[2026-08-13: Bake-off effort lock (UAS xhigh, PCS 3× medium, SGS digs high)]])
+- [x] Lock UAS bake-off knobs: `reasoning_effort=xhigh` in `unified_adaptive_search/agent_call.py` (see [[2026-08-13: Bake-off effort lock (UAS xhigh, PCS 3× medium, SGS digs high)]])
 - [x] SGS **design** freeze (dig-all signaled. Effort table superseded: SGS digs high, not 1=max)
 - [x] SGS digs = **high** on every signaled channel (see [[2026-08-13: Bake-off effort lock (UAS xhigh, PCS 3× medium, SGS digs high)]])
 - [x] SGS scout semantics = **presence screen** (see [[2026-08-11: SGS scouts are channel presence screens]])
