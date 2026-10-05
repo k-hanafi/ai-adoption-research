@@ -65,6 +65,26 @@ def test_removed_files_are_gone() -> None:
         assert not (ROOT / rel).exists(), rel
 
 
+def test_decks_scoreboards_and_requirements_are_not_tracked() -> None:
+    tracked = subprocess.check_output(
+        ["git", "ls-files"],
+        cwd=ROOT,
+        text=True,
+    ).splitlines()
+    assert "requirements.txt" not in tracked
+    assert not any(
+        path.startswith("presentation/") and path.endswith(".html") for path in tracked
+    )
+    assert "legacy_agent_march_2026/presentation/production_results.html" in tracked
+    assert not any(path.endswith("/summary.jsonl") for path in tracked)
+    instances = [path for path in tracked if path.startswith("evals/instances/")]
+    assert instances == ["evals/instances/.gitkeep"]
+    ignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
+    assert "presentation/*.html" in ignore
+    assert "!outputs/stage2/test_runs/**/summary.jsonl" not in ignore
+    assert "evals/instances/**" in ignore
+
+
 def test_cursor_plans_are_not_tracked() -> None:
     tracked = subprocess.check_output(
         ["git", "ls-files", ".cursor/plans"],

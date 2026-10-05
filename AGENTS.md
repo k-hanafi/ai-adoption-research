@@ -46,7 +46,7 @@ Citation checks use `python -m production verify` and `python -m citation_verifi
 
 Do not import `legacy_agent_march_2026` from live code. Do not import live code from that folder. `src/stage_2/` exits on purpose. The live Stage 2 runners are the three architecture packages.
 
-Company panels and `summary.jsonl` files stay in git. The paid-probe runner is `evals/paid_probes.py`. Paid per-company traces under `outputs/stage2/test_runs/` stay local.
+Company panels in `evals/panel/` stay in git. Probe `summary.jsonl` files and paid per-company traces under `outputs/stage2/test_runs/` stay local. The paid-probe runner is `evals/paid_probes.py`.
 
 ## Knobs that stay put
 

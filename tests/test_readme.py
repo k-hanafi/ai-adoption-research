@@ -13,3 +13,6 @@ def test_readme_points_at_the_live_commands() -> None:
     assert "unread page stays null" in text
     assert "python -m production verify" in text
     assert "python -m citation_verification" in text
+    assert "summary.jsonl" not in text
+    assert "presentation/" in text
+    assert "are not in git" in text

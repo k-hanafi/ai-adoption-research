@@ -122,10 +122,28 @@ def json_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def test_catalog_matches_scoreboards() -> None:
-    summaries = sorted(path.parent.name for path in RUNS.glob("*/summary.jsonl"))
-    assert summaries == sorted(PROBES)
+PROBE_NAMES = (
+    "pcs_confirm_20_high",
+    "pcs_confirm_20_medium",
+    "pcs_hillclimb_20",
+    "pcs_hillclimb_20_high",
+    "pcs_hillclimb_20_medium_v2",
+    "sgs_hillclimb_20_high",
+    "sgs_hillclimb_20_matched",
+    "sgs_hillclimb_20_medium",
+    "sgs_skip_50",
+    "sgs_smoke_5co",
+    "sgs_smoke_5co_low_scouts",
+    "sgs_smoke_covertree_tern_v2",
+    "uas_hillclimb_20_xhigh",
+)
+
+
+def test_catalog_names_the_historical_probes() -> None:
+    assert sorted(PROBES) == sorted(PROBE_NAMES)
     assert list(RUNS.glob("*/run_*.py")) == []
+    on_disk = {path.parent.name for path in RUNS.glob("*/summary.jsonl")}
+    assert on_disk <= set(PROBES)
 
 
 def test_main_refuses_without_live(capsys: pytest.CaptureFixture[str]) -> None:

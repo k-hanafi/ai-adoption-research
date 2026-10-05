@@ -1,6 +1,6 @@
 # Presentation decks
 
-These HTML files are the February and March 2026 decks. They describe that research run. The live batch command is `python -m production`.
+Git does not track the HTML files in this folder. A checkout that still has them locally has these four decks.
 
 | File | What it shows |
 |---|---|
@@ -9,4 +9,4 @@ These HTML files are the February and March 2026 decks. They describe that resea
 | `stage_2_results.html` | Stage 2 results, March 2026 |
 | `stage_2_scaling_proposal.html` | Scaling proposal, March 2026 |
 
-The March findings dashboard is `legacy_agent_march_2026/presentation/production_results.html`.
+The March findings dashboard stays in git at `legacy_agent_march_2026/presentation/production_results.html`.

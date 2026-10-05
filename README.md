@@ -43,13 +43,13 @@ python -m production verify --limit 1 --live
 
 ## Plan spend for Signal Gated Search
 
-Plan a full SGS batch at about $0.16 per company. The hill-climb 20 mean was $0.171. The skip-50 mean was $0.157. Those scoreboards are `outputs/stage2/test_runs/sgs_hillclimb_20_matched/summary.jsonl` and `outputs/stage2/test_runs/sgs_skip_50/summary.jsonl`.
+Plan a full SGS batch at about $0.16 per company. The hill-climb 20 mean was $0.171. The skip-50 mean was $0.157. Those scoreboards stay on the machine that ran them.
 
 `python -m evals.paid_probes` lists the historical probes and exits 2. It calls the Agent API only when you pass a probe name and `--live`. Five early SGS folders still refuse `--live`, because their scoreboards used an older scout preset or a shallower dig.
 
 ## March 2026 run
 
-That run produced 2,062 findings. The dashboard is [`legacy_agent_march_2026/presentation/production_results.html`](legacy_agent_march_2026/presentation/production_results.html). HTML files in `presentation/` are proposal and stage decks from January through March 2026. They are separate from that dashboard.
+That run produced 2,062 findings. The dashboard is [`legacy_agent_march_2026/presentation/production_results.html`](legacy_agent_march_2026/presentation/production_results.html). The proposal and stage decks under `presentation/` are not in git.
 
 ## Where the code lives
 

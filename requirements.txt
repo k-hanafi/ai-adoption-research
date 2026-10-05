@@ -1,8 +1,0 @@
-# ═══════════════════════════════════════════════════════════════════════════
-# Deep Research AI Agent — Dependencies
-# ═══════════════════════════════════════════════════════════════════════════
-# Install: pip install -r requirements.txt
-# ═══════════════════════════════════════════════════════════════════════════
-
-httpx>=0.27.0              # Async HTTP for Stage 1 (OpenAI + Tavily APIs)
-perplexityai               # Perplexity Agent API (Stage 2 deep research)

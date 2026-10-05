@@ -54,9 +54,10 @@ outputs/**/*.html
 outputs/**/latest
 !outputs/.gitkeep
 !outputs/evals/runs/.gitkeep
-!outputs/stage2/test_runs/**/summary.jsonl
 logs/*.log
 checkpoints/*.json
+# January to March 2026 decks. The March findings dashboard stays under legacy_agent_march_2026/.
+presentation/*.html
 # Legacy presentation archive (superseded by evals/instances/)
 presentation/eval_instances/catalog.json
 presentation/eval_instances/index.html

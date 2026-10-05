@@ -34,7 +34,8 @@ Human: skim this file when writing the paper/portfolio narrative. Agents: update
 - SGS hill-climb 20-co matched leash (low scouts + 50/medium/high digs; vs PCS high): `outputs/stage2/test_runs/sgs_hillclimb_20_matched/`
 - SGS skip panel (50-co March none/low, not bake-off): `evals/panel/sgs_skip_panel.json`
 - SGS skip-rate 50-co live (package defaults): `outputs/stage2/test_runs/sgs_skip_50/`
-- Paid per-company traces under `outputs/stage2/test_runs/` are local-only (gitignored). Scoreboards (`summary.jsonl`) stay in git. The runner is `evals/paid_probes.py`.
+- Paid per-company traces and `summary.jsonl` scoreboards under `outputs/stage2/test_runs/` are local-only (gitignored). The runner is `evals/paid_probes.py`.
+- January to March 2026 decks under `presentation/` are local-only (gitignored). The March findings dashboard stays at `legacy_agent_march_2026/presentation/production_results.html`.
 - SGS hill-climb 20-co medium digs (measurement probe): `outputs/stage2/test_runs/sgs_hillclimb_20_medium/`
 - SGS 5-co low-scout A/B smoke (measurement; later locked as default): `outputs/stage2/test_runs/sgs_smoke_5co_low_scouts/`
 - Agent rule: `.cursor/rules/decision-log.mdc`
@@ -995,7 +996,7 @@ Scout tax mean **$0.020**/co ($0.984). Dig spend mean $0.137 ($6.867). Owned lit
 
 ## 2026-08-15: Paid per-company traces stay local, not in git
 
-**Status:** the `*.py` runner half is superseded by [[2026-10-05: One paid-probe script]]. Per-company JSON stays local.
+**Status:** the `*.py` runner half is superseded by [[2026-10-05: One paid-probe script]]. The `summary.jsonl` half is superseded by [[2026-10-05: Stop tracking decks and scoreboards]]. Per-company JSON stays local.
 
 **Decision:** Drop per-company Agent JSON (and `test_results.csv`) from git. Keep runners (`*.py`) and `summary.jsonl` scoreboards. `.gitignore` no longer un-ignores `outputs/stage2/test_runs/**/*.json`.
 
@@ -1541,6 +1542,8 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 
 ## 2026-08-20: Licensed dumps stay local, samples stay in git
 
+**Status:** the `summary.jsonl` half is superseded by [[2026-10-05: Stop tracking decks and scoreboards]]. Licensed dumps stay local. Samples stay in git.
+
 **Decision:** Stop tracking the Crunchbase input dumps and keep production / Stage 3 result files local. Ship fictional schema samples instead. Eval `summary.jsonl` scoreboards stay in git. No `CITATION.cff` in this pass. No history rewrite unless Crunchbase or the PI asks.
 
 **Why:** The public GitHub repo was hosting two copies of the ~27MB Crunchbase slice plus the 9,420-row Stage 2 queue. That is a license risk for portfolio viewers and for a paper data-availability statement. Clones still need to see the column layout.
@@ -1554,6 +1557,8 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 ---
 
 ## 2026-10-05: Execute hygiene as six pull requests
+
+**Status:** item 5's "keep every `summary.jsonl`" is superseded by [[2026-10-05: Stop tracking decks and scoreboards]].
 
 **Decision:** Run the portfolio cleanup as six pull requests, in this order.
 
@@ -1618,6 +1623,8 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 
 ## 2026-10-05: One paid-probe script
 
+**Status:** the tracked-`summary.jsonl` half is superseded by [[2026-10-05: Stop tracking decks and scoreboards]]. One script stays.
+
 **Decision:** Delete the thirteen `run_*.py` scripts under `outputs/stage2/test_runs/`. `evals/paid_probes.py` is the re-run entry. Each probe keeps its panel, worker count, effort, and output folder. Every `summary.jsonl` stays tracked. The command exits 2 unless you pass a probe name and `--live`. Five SGS folders still exit 2 with `--live`, because their scoreboards used fast scouts or digs at 10 steps and search depth low, and the package now uses scout preset low and digs at 50 steps with search depth medium. Resume skips a company only when that company's JSON has an empty `error`. A later failure does not replace a successful JSON. The medium-dig probe still records a `medium` dig effort, and it is one of the five that refuse `--live`.
 
 **Why:** The scripts were copies of one loop. The scoreboards are the measurement. A bare command must not spend money.
@@ -1639,5 +1646,19 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 **Evidence:** `README.md`. `tests/test_readme.py`.
 
 **Alternatives rejected:** Rewriting the readme before the tree matched it. Putting a license file in this pull request.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.
+
+---
+
+## 2026-10-05: Stop tracking decks and scoreboards
+
+**Decision:** Git does not track the four HTML decks in `presentation/`. Git does not track `outputs/stage2/test_runs/**/summary.jsonl`. `evals/instances/` stays ignored except `.gitkeep`. Delete `requirements.txt`. The March dashboard `legacy_agent_march_2026/presentation/production_results.html` stays tracked. Install stays `python -m pip install -e ".[dev]"` from `pyproject.toml`.
+
+**Why:** Khaled asked to ignore the dashboards, the eval instances, the summary runs, and the stale requirements file. A portfolio clone should not carry the January to March decks or the probe scoreboards. The March findings dashboard is the one the readme still links.
+
+**Evidence:** `.gitignore`. `docs/DATA.md`. `presentation/README.md`. `tests/test_packaging.py`. `tests/test_paid_probes.py`. `tests/test_hygiene_subtract.py`.
+
+**Alternatives rejected:** Keeping `sgs_hillclimb_20_matched/summary.jsonl` and `sgs_skip_50/summary.jsonl` because the readme cites their means. Deleting `legacy_agent_march_2026/presentation/production_results.html`. Rewriting git history.
 
 **Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.

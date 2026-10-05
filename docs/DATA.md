@@ -1,7 +1,7 @@
 # Data that is and is not in git
 
-This repo ships **code, prompts, eval scoreboards, and fictional schema
-samples**. It does not ship the licensed Crunchbase dump or the full
+This repo ships **code, prompts, and fictional schema samples**. It does not
+ship the licensed Crunchbase dump, the probe scoreboards, or the full
 production finding tables.
 
 | Kind | In git? | Where |
@@ -12,11 +12,11 @@ production finding tables.
 | Production findings / traces | No | Local `outputs/prod/{sgs,pcs,uas}/` |
 | Fictional findings sample | Yes | `outputs/prod/sample/findings.sample.csv` |
 | March master dump (~69MB) | No | Local `evals/references/march_2026_production.jsonl` |
-| Eval panel + `summary.jsonl` | Yes | `evals/panel/`, `outputs/stage2/test_runs/` |
+| Eval company panels | Yes | `evals/panel/` |
+| Probe `summary.jsonl` | No | Local `outputs/stage2/test_runs/` |
 
-Eval `summary.jsonl` files are small scoreboards (company id, cost, finding
-count). They are kept as measurement evidence. Per-company Agent dumps stay
-local.
+Probe `summary.jsonl` files record company id, cost, and finding count. They
+stay on the machine that ran the probe. Per-company Agent dumps stay local.
 
 To run production against the fictional sample:
 
