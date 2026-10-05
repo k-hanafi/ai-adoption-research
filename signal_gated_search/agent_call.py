@@ -1,23 +1,18 @@
-"""SGS request builders and the presence-scout parse.
-
-Scout calls use preset low and web_search only. Dig calls use the shared findings client.
-"""
-
 from __future__ import annotations
 
-import json
 from typing import Any, Optional
 
 from agent_api.client import (
     create_response,
     extract_content_text,
-    extract_json_object,
     execute_agent_call,
+    load_json_object,
+    request_snapshot,
     require_api_key,
+    usage_fields,
     web_search_tool,
 )
 from contracts.types import CompanyInput
-from parallel_channel_search.agent_call import request_snapshot
 from signal_gated_search.channels import (
     DEFAULT_DIG_MAX_STEPS,
     DEFAULT_DIG_MODEL,
@@ -92,36 +87,6 @@ def execute_dig_call(
     )
 
 
-def _usage_meta(response: Any, *, channel_id: str) -> dict[str, Any]:
-    cost_usd = 0.0
-    input_tokens = None
-    output_tokens = None
-    total_tokens = None
-    if getattr(response, "usage", None):
-        input_tokens = response.usage.input_tokens
-        output_tokens = response.usage.output_tokens
-        total_tokens = response.usage.total_tokens
-        if response.usage.cost and response.usage.cost.total_cost is not None:
-            cost_usd = float(response.usage.cost.total_cost)
-    return {
-        "channel_id": channel_id,
-        "response_id": getattr(response, "id", None),
-        "model_used": getattr(response, "model", None),
-        "response_status": getattr(response, "status", None),
-        "cost_usd": cost_usd,
-        "input_tokens": input_tokens,
-        "output_tokens": output_tokens,
-        "total_tokens": total_tokens,
-        "evidence_bin": "none",
-        "urls": [],
-        "snippets": [],
-        "rationale": "",
-        "error": None,
-        "transport_error": False,
-        "raw_content_preview": None,
-    }
-
-
 def execute_scout_call(
     request_kwargs: dict[str, Any],
     *,
@@ -130,7 +95,19 @@ def execute_scout_call(
     timeout: float = DEFAULT_TIMEOUT,
 ) -> dict[str, Any]:
     response = create_response(request_kwargs, api_key=api_key, timeout=timeout)
-    meta = _usage_meta(response, channel_id=channel_id)
+    meta: dict[str, Any] = {"channel_id": channel_id}
+    meta.update(usage_fields(response))
+    meta.update(
+        {
+            "evidence_bin": "none",
+            "urls": [],
+            "snippets": [],
+            "rationale": "",
+            "error": None,
+            "transport_error": False,
+            "raw_content_preview": None,
+        }
+    )
 
     if getattr(response, "status", None) == "failed":
         err = getattr(response, "error", None)
@@ -149,24 +126,16 @@ def execute_scout_call(
         return meta
 
     meta["raw_content_preview"] = content[:500]
-    try:
-        try:
-            parsed = json.loads(content)
-        except json.JSONDecodeError:
-            parsed = json.loads(extract_json_object(content))
-        if not isinstance(parsed, dict):
-            meta["error"] = f"JSON root must be an object, got {type(parsed).__name__}"
-            return meta
-        meta["evidence_bin"] = str(parsed.get("evidence_bin") or "none")
-        urls = parsed.get("urls") or []
-        snippets = parsed.get("snippets") or []
-        meta["urls"] = [str(u) for u in urls] if isinstance(urls, list) else []
-        meta["snippets"] = [str(s) for s in snippets] if isinstance(snippets, list) else []
-        meta["rationale"] = str(parsed.get("rationale") or "")
-    except json.JSONDecodeError as exc:
-        meta["error"] = f"JSON parse error: {exc}"
-    except Exception as exc:
-        meta["error"] = f"Response parse error: {type(exc).__name__}: {exc}"
+    parsed, error = load_json_object(content)
+    if error:
+        meta["error"] = error
+        return meta
+    meta["evidence_bin"] = str(parsed.get("evidence_bin") or "none")
+    urls = parsed.get("urls") or []
+    snippets = parsed.get("snippets") or []
+    meta["urls"] = [str(u) for u in urls] if isinstance(urls, list) else []
+    meta["snippets"] = [str(s) for s in snippets] if isinstance(snippets, list) else []
+    meta["rationale"] = str(parsed.get("rationale") or "")
     return meta
 
 

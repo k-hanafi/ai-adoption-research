@@ -27,7 +27,6 @@ _DIG_FILES = {
 
 _prompt_templates: dict[str, str] = {}
 
-# Digs reuse the PCS findings schema so bake-off rows stay comparable.
 DIG_RESPONSE_SCHEMA = RESPONSE_SCHEMA
 
 SCOUT_RESPONSE_SCHEMA = {

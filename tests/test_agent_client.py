@@ -1,11 +1,15 @@
+import inspect
+
 from agent_api.client import execute_agent_call
 from contracts.schema import RESPONSE_SCHEMA
 from contracts.types import CompanyInput
 from parallel_channel_search.agent_call import build_request_kwargs as build_pcs
 from parallel_channel_search.prompting import RESPONSE_SCHEMA as PCS_SCHEMA
+from parallel_channel_search.agent_call import execute_agent_call as pcs_execute
 from signal_gated_search.agent_call import (
     build_dig_request_kwargs,
     build_scout_request_kwargs,
+    execute_scout_call,
 )
 from signal_gated_search.prompting import DIG_RESPONSE_SCHEMA
 from unified_adaptive_search.agent_call import build_request_kwargs as build_uas
@@ -41,6 +45,8 @@ def test_uas_dry_kwargs_stay_low_xhigh() -> None:
     assert web["max_results"] == 10
     assert web["search_context_size"] == "medium"
     assert web["max_tokens"] == 2000
+    assert [tool["type"] for tool in kwargs["tools"]] == ["web_search", "fetch_url"]
+    assert "preset" not in kwargs
 
 
 def test_sgs_scout_is_low_preset_without_fetch() -> None:
@@ -96,3 +102,38 @@ def test_parse_failure_keeps_metered_cost(monkeypatch) -> None:
     assert meta["error"].startswith("JSON parse error")
     assert meta["channel_id"] == "jobs"
     assert meta["findings"] == []
+
+
+def test_pcs_execute_requires_channel_id() -> None:
+    param = inspect.signature(pcs_execute).parameters["channel_id"]
+    assert param.default is inspect.Parameter.empty
+
+
+def test_scout_parse_failure_keeps_metered_cost(monkeypatch) -> None:
+    class _Cost:
+        total_cost = 0.17
+
+    class _Usage:
+        input_tokens = 1
+        output_tokens = 2
+        total_tokens = 3
+        cost = _Cost()
+
+    class _Response:
+        id = "scout"
+        model = "preset"
+        status = "completed"
+        output_text = "not json"
+        output = []
+        usage = _Usage()
+        error = None
+
+    monkeypatch.setattr(
+        "signal_gated_search.agent_call.create_response",
+        lambda *args, **kwargs: _Response(),
+    )
+    meta = execute_scout_call({"preset": "low"}, channel_id="jobs", api_key="k")
+    assert meta["cost_usd"] == 0.17
+    assert meta["error"].startswith("JSON parse error")
+    assert meta["evidence_bin"] == "none"
+    assert meta["channel_id"] == "jobs"

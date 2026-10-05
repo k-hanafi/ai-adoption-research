@@ -5,6 +5,7 @@ from __future__ import annotations
 import time
 from typing import Any, Optional, Union
 
+from agent_api.client import request_snapshot
 from contracts.types import (
     ArchitectureResult,
     CompanyInput,
@@ -25,18 +26,6 @@ from unified_adaptive_search.agent_call import (
 
 ARCHITECTURE_NAME = "Unified Adaptive Search"
 ARCHITECTURE_CLI_KEY = "unified-adaptive-search"
-
-
-def _request_snapshot(request_kwargs: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "model": request_kwargs.get("model"),
-        "max_steps": request_kwargs.get("max_steps"),
-        "reasoning": request_kwargs.get("reasoning"),
-        "tools": request_kwargs.get("tools"),
-        "has_response_format": "response_format" in request_kwargs,
-        "input_chars": len(request_kwargs.get("input") or ""),
-        "has_preset": "preset" in request_kwargs,
-    }
 
 
 def run(
@@ -68,7 +57,7 @@ def run(
         reasoning_effort=reasoning_effort,
         web_search_depth=web_search_depth,
     )
-    snapshot = _request_snapshot(request_kwargs)
+    snapshot = request_snapshot(request_kwargs)
 
     if dry_run:
         ledger = CostLedger.from_components(

@@ -96,9 +96,8 @@ def require_api_key(api_key: Optional[str] = None) -> str:
     key = APIKeys().perplexity
     if not key:
         raise RuntimeError(
-            "Perplexity API key required for a live Agent API call. "
-            "Set credentials/perplexity_api_key.txt or PERPLEXITY_API_KEY. "
-            "Use dry_run=True to build request snapshots without calling the API."
+            "Perplexity API key required. "
+            "Set credentials/perplexity_api_key.txt or PERPLEXITY_API_KEY."
         )
     return key
 
@@ -141,6 +140,57 @@ def parse_findings(raw_findings: Any, *, channel_id: Optional[str] = None) -> li
         except (TypeError, ValueError):
             continue
     return findings
+
+
+def usage_fields(response: Any) -> dict[str, Any]:
+    cost_usd = 0.0
+    input_tokens = None
+    output_tokens = None
+    total_tokens = None
+    usage = getattr(response, "usage", None)
+    if usage:
+        input_tokens = usage.input_tokens
+        output_tokens = usage.output_tokens
+        total_tokens = usage.total_tokens
+        cost = getattr(usage, "cost", None)
+        if cost is not None and getattr(cost, "total_cost", None) is not None:
+            cost_usd = float(cost.total_cost)
+    return {
+        "response_id": getattr(response, "id", None),
+        "model_used": getattr(response, "model", None),
+        "response_status": getattr(response, "status", None),
+        "cost_usd": cost_usd,
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "total_tokens": total_tokens,
+    }
+
+
+def load_json_object(content: str) -> tuple[Optional[dict[str, Any]], Optional[str]]:
+    try:
+        try:
+            parsed = json.loads(content)
+        except json.JSONDecodeError:
+            parsed = json.loads(extract_json_object(content))
+    except json.JSONDecodeError as exc:
+        return None, f"JSON parse error: {exc}"
+    except Exception as exc:
+        return None, f"Response parse error: {type(exc).__name__}: {exc}"
+    if not isinstance(parsed, dict):
+        return None, f"JSON root must be an object, got {type(parsed).__name__}"
+    return parsed, None
+
+
+def request_snapshot(request_kwargs: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "model": request_kwargs.get("model"),
+        "max_steps": request_kwargs.get("max_steps"),
+        "reasoning": request_kwargs.get("reasoning"),
+        "tools": request_kwargs.get("tools"),
+        "has_response_format": "response_format" in request_kwargs,
+        "input_chars": len(request_kwargs.get("input") or ""),
+        "has_preset": "preset" in request_kwargs,
+    }
 
 
 def tool_use_from_response(response: Any) -> dict[str, Any]:
@@ -206,30 +256,12 @@ def execute_agent_call(
     timeout: float = DEFAULT_TIMEOUT,
 ) -> dict[str, Any]:
     response = create_response(request_kwargs, api_key=api_key, timeout=timeout)
-
-    cost_usd = 0.0
-    input_tokens = None
-    output_tokens = None
-    total_tokens = None
-    if response.usage:
-        input_tokens = response.usage.input_tokens
-        output_tokens = response.usage.output_tokens
-        total_tokens = response.usage.total_tokens
-        if response.usage.cost and response.usage.cost.total_cost is not None:
-            cost_usd = float(response.usage.cost.total_cost)
-
     tool_use = tool_use_from_response(response)
     meta: dict[str, Any] = {}
     if channel_id is not None:
         meta["channel_id"] = channel_id
+    meta.update(usage_fields(response))
     meta.update({
-        "response_id": response.id,
-        "model_used": response.model,
-        "response_status": response.status,
-        "cost_usd": cost_usd,
-        "input_tokens": input_tokens,
-        "output_tokens": output_tokens,
-        "total_tokens": total_tokens,
         "citations": tool_use["citations"],
         "tool_use": {
             "tool_calls_details": tool_use["tool_calls_details"],
@@ -265,20 +297,12 @@ def execute_agent_call(
         return meta
 
     meta["raw_content_preview"] = content[:500]
-    try:
-        try:
-            parsed = json.loads(content)
-        except json.JSONDecodeError:
-            parsed = json.loads(extract_json_object(content))
-        if not isinstance(parsed, dict):
-            meta["error"] = f"JSON root must be an object, got {type(parsed).__name__}"
-            return meta
-        meta["findings"] = parse_findings(parsed.get("findings"), channel_id=channel_id)
-        meta["genai_adoption_found"] = bool(parsed.get("genai_adoption_found", False))
-        meta["no_finding_reason"] = parsed.get("no_finding_reason")
-        meta["no_finding_analysis"] = parsed.get("no_finding_analysis")
-    except json.JSONDecodeError as exc:
-        meta["error"] = f"JSON parse error: {exc}"
-    except Exception as exc:
-        meta["error"] = f"Response parse error: {type(exc).__name__}: {exc}"
+    parsed, error = load_json_object(content)
+    if error:
+        meta["error"] = error
+        return meta
+    meta["findings"] = parse_findings(parsed.get("findings"), channel_id=channel_id)
+    meta["genai_adoption_found"] = bool(parsed.get("genai_adoption_found", False))
+    meta["no_finding_reason"] = parsed.get("no_finding_reason")
+    meta["no_finding_analysis"] = parsed.get("no_finding_analysis")
     return meta

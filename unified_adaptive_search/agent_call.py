@@ -1,10 +1,3 @@
-"""Request builder for one UAS company call.
-
-Live defaults are model openai/gpt-5.6-luna, max_steps 10, reasoning effort xhigh, and web search depth low.
-
-Dry-run uses build_request_kwargs only. The live call is agent_api.client.
-"""
-
 from __future__ import annotations
 
 from typing import Any, Optional

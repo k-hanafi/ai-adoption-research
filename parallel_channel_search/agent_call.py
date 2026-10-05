@@ -1,13 +1,13 @@
-"""Request builder for one PCS channel.
-
-Dry-run uses build_request_kwargs only. The live call is agent_api.client.
-"""
-
 from __future__ import annotations
 
 from typing import Any, Optional
 
-from agent_api.client import execute_agent_call, require_api_key, web_search_tool
+from agent_api.client import (
+    execute_agent_call as _execute_agent_call,
+    request_snapshot,
+    require_api_key,
+    web_search_tool,
+)
 from contracts.types import CompanyInput
 from parallel_channel_search.channels import (
     DEFAULT_MAX_STEPS,
@@ -44,16 +44,19 @@ def build_request_kwargs(
     return kwargs
 
 
-def request_snapshot(request_kwargs: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "model": request_kwargs.get("model"),
-        "max_steps": request_kwargs.get("max_steps"),
-        "reasoning": request_kwargs.get("reasoning"),
-        "tools": request_kwargs.get("tools"),
-        "has_response_format": "response_format" in request_kwargs,
-        "input_chars": len(request_kwargs.get("input") or ""),
-        "has_preset": "preset" in request_kwargs,
-    }
+def execute_agent_call(
+    request_kwargs: dict[str, Any],
+    *,
+    channel_id: str,
+    api_key: Optional[str] = None,
+    timeout: float = DEFAULT_TIMEOUT,
+) -> dict[str, Any]:
+    return _execute_agent_call(
+        request_kwargs,
+        channel_id=channel_id,
+        api_key=api_key,
+        timeout=timeout,
+    )
 
 
 __all__ = [
