@@ -13,7 +13,8 @@ from typing import Optional
 
 import httpx
 
-from ..config import PROCESSING, APIKeys
+from ..config import PROCESSING
+from ..keys import APIKeys
 from ..common.retry import async_retry
 
 

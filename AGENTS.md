@@ -29,6 +29,8 @@ Citation checks use `python -m production verify` and `python -m citation_verifi
 
 | Path | Role |
 |---|---|
+| `src/keys.py` | API keys. Importing it does not create output directories. |
+| `src/config.py` | Stage 1 paths. Importing it creates output directories. |
 | `src/stage_1/` | Website check and priority score |
 | `signal_gated_search/` | Default Stage 2 architecture |
 | `parallel_channel_search/` | Three equal-depth channels |

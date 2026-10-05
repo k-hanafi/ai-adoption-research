@@ -40,6 +40,7 @@ Human: skim this file when writing the paper/portfolio narrative. Agents: update
 - Agent rule: `.cursor/rules/decision-log.mdc`
 - Agent brief: `AGENTS.md`
 - Packaging: `pyproject.toml`, `.github/workflows/pytest.yml`
+- API keys: `src/keys.py`
 - Stage 3 package: `citation_verification/` (production; not under `evals/`)
 - Stage 3 judge prompt: `prompts/citation_verification/judge.txt`
 - Stage 3 CLI outputs: `python -m citation_verification --output-jsonl` / `--output-csv`
@@ -1579,3 +1580,17 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 **Alternatives rejected:** Leaving the commands as writers of stub dashboards. Keeping `.cursor/plans/` in git. Pointing `run-verification` at `citation_verification`.
 
 **Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`. The README rewrite is pull request 6.
+
+---
+
+## 2026-10-05: API keys load from src/keys.py
+
+**Decision:** Live code loads API keys from `src/keys.py`. `src/config.py` no longer defines `APIKeys` or `_load_credential`. Importing `src/keys` does not import `src/config`, so it does not create output directories. The March snapshot keeps its own copy.
+
+**Why:** Stage 2 and the citation judge were importing `src/config` only to read a key. That import creates `outputs/` and `logs/` as a side effect.
+
+**Evidence:** Callers are the three `agent_call.py` modules, `citation_verification/judge.py`, and `src/stage_1/`. Test: `tests/test_keys.py`.
+
+**Alternatives rejected:** Re-exporting `APIKeys` from `src/config.py`. Editing `legacy_agent_march_2026/src/config.py` to match.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.

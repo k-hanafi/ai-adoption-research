@@ -107,7 +107,7 @@ def require_api_key(api_key: Optional[str] = None) -> str:
     """Resolve Perplexity key from arg, credentials file, or env. Refuse if missing."""
     if api_key:
         return api_key
-    from src.config import APIKeys
+    from src.keys import APIKeys
 
     key = APIKeys().perplexity
     if not key:

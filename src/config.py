@@ -7,7 +7,6 @@ Single source of truth for the entire pipeline.
 
 from dataclasses import dataclass
 from pathlib import Path
-import os
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -19,7 +18,6 @@ DATA_DIR = PROJECT_ROOT / "crunchbase_data"
 OUTPUT_DIR = PROJECT_ROOT / "outputs"
 LOG_DIR = PROJECT_ROOT / "logs"
 CHECKPOINT_DIR = PROJECT_ROOT / "checkpoints"
-CREDENTIALS_DIR = PROJECT_ROOT / "credentials"
 PROMPTS_DIR = PROJECT_ROOT / "prompts"
 
 # Stage-specific output directories (all under OUTPUT_DIR; contents are gitignored)
@@ -36,83 +34,6 @@ for dir_path in [OUTPUT_DIR, LOG_DIR, CHECKPOINT_DIR,
                  STAGE1_OUTPUT_DIR, STAGE1_TAVILY_DIR, STAGE1_GPT_DIR,
                  STAGE2_OUTPUT_DIR, STAGE2_TEST_RUNS_DIR]:
     dir_path.mkdir(exist_ok=True)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# CREDENTIAL LOADING
-# ─────────────────────────────────────────────────────────────────────────────
-
-def _load_credential(filename: str) -> str:
-    """
-    Load an API key from a credential file.
-    
-    Falls back to environment variable if file doesn't exist.
-    
-    Args:
-        filename: Name of the credential file (e.g., 'tavily_api_key.txt')
-    
-    Returns:
-        The API key string, or empty string if not found.
-    """
-    # Try loading from file first
-    cred_path = CREDENTIALS_DIR / filename
-    if cred_path.exists():
-        content = cred_path.read_text().strip()
-        # Skip comment lines and empty lines
-        lines = [line.strip() for line in content.split('\n') 
-                 if line.strip() and not line.strip().startswith('#')]
-        if lines:
-            return lines[0]  # Return first non-comment line
-    
-    # Fall back to environment variable
-    env_var = filename.replace('_api_key.txt', '').upper() + '_API_KEY'
-    return os.getenv(env_var, "")
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# API KEYS
-# ─────────────────────────────────────────────────────────────────────────────
-
-@dataclass
-class APIKeys:
-    """
-    API credentials loaded from credentials folder or environment variables.
-    
-    Priority:
-    1. credentials/<service>_api_key.txt file
-    2. Environment variable (e.g., TAVILY_API_KEY)
-    """
-    tavily: str = ""
-    openai: str = ""
-    perplexity: str = ""
-    
-    def __post_init__(self):
-        """Load credentials if not already set."""
-        if not self.tavily:
-            object.__setattr__(self, 'tavily', _load_credential('tavily_api_key.txt'))
-        if not self.openai:
-            object.__setattr__(self, 'openai', _load_credential('openai_api_key.txt'))
-        if not self.perplexity:
-            object.__setattr__(self, 'perplexity', _load_credential('perplexity_api_key.txt'))
-
-    def validate(self) -> list[str]:
-        """Return list of missing API keys."""
-        missing = []
-        if not self.tavily:
-            missing.append("tavily (credentials/tavily_api_key.txt)")
-        if not self.openai:
-            missing.append("openai (credentials/openai_api_key.txt)")
-        if not self.perplexity:
-            missing.append("perplexity (credentials/perplexity_api_key.txt)")
-        return missing
-    
-    def status(self) -> dict[str, bool]:
-        """Return status of each API key."""
-        return {
-            "tavily": bool(self.tavily),
-            "openai": bool(self.openai),
-            "perplexity": bool(self.perplexity),
-        }
 
 
 # ─────────────────────────────────────────────────────────────────────────────

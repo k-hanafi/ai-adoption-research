@@ -13,7 +13,8 @@ from typing import Optional
 
 import httpx
 
-from ..config import PROCESSING, APIKeys, PROMPTS_DIR
+from ..config import PROCESSING, PROMPTS_DIR
+from ..keys import APIKeys
 from ..common.retry import async_retry
 from .website import WebsiteStatus
 from .tavily import TavilySearchResult
