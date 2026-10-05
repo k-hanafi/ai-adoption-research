@@ -41,6 +41,7 @@ Human: skim this file when writing the paper/portfolio narrative. Agents: update
 - SGS hill-climb 20-co medium digs (measurement probe): `outputs/stage2/test_runs/sgs_hillclimb_20_medium/`
 - SGS 5-co low-scout A/B smoke (measurement; later locked as default): `outputs/stage2/test_runs/sgs_smoke_5co_low_scouts/`
 - Agent rule: `.cursor/rules/decision-log.mdc`
+- Packaging: `pyproject.toml`, `.github/workflows/pytest.yml`
 - Stage 3 verification plan: `.cursor/plans/phase-2-stage3-verification.plan.md`
 - Stage 3 bulletproof plan: `.cursor/plans/bulletproof-citation-verifier.plan.md`
 - Stage 3 package: `citation_verification/` (production; not under `evals/`)
@@ -1547,3 +1548,24 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 **Alternatives rejected:** Copying 20 real Crunchbase rows into the sample (still republishes licensed records). Deleting `legacy_agent_march_2026/`. Gitignoring eval `summary.jsonl` (those are small measurement evidence, not the licensed dump). Rewriting git history in this pass.
 
 **Open follow-ups:** History still contains the old blobs. Ask Jan before any `git filter-repo`. README rewrite later.
+
+---
+
+## 2026-10-05: Execute hygiene as six pull requests
+
+**Decision:** Run the portfolio cleanup as six pull requests, in this order.
+
+1. `pyproject.toml` and a pytest workflow.
+2. Delete unused eval YAML, one-shot tune scripts, unread knobs, and the eval stub commands. Fix the short docs. Add `AGENTS.md`. Stop tracking `.cursor/plans/`.
+3. Move `APIKeys` to `src/keys.py`.
+4. One Perplexity client, the finding schema in `contracts`, and all three architectures switched to that client.
+5. One paid-probe script. Keep every `summary.jsonl`.
+6. Rewrite `README.md` only after the five above.
+
+**Why:** Fourteen review slices were more pulls than the diff needs. Khaled locked the six on 2026-10-05.
+
+**Evidence:** Eval YAML is 109 lines and no Python loads it. The three one-shot tune scripts are 1,115 lines. The thirteen `run_*.py` scripts are 3,019 lines. The copied clients are `parallel_channel_search/agent_call.py` (336), `unified_adaptive_search/agent_call.py` (359), and `signal_gated_search/agent_call.py` (275).
+
+**Alternatives rejected:** Fourteen pull requests. One pull request for the whole cleanup. Rewriting `README.md` before the tree matches it. Deleting `legacy_agent_march_2026/`. Changing `DEFAULT_WEB_SEARCH_DEPTH` from `low` to `medium`.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.
