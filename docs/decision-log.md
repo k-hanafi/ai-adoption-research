@@ -35,7 +35,7 @@ Human: skim this file when writing the paper/portfolio narrative. Agents: update
 - SGS skip panel (50-co March none/low, not bake-off): `evals/panel/sgs_skip_panel.json`
 - SGS skip-rate 50-co live (package defaults): `outputs/stage2/test_runs/sgs_skip_50/`
 - Paid per-company traces and `summary.jsonl` scoreboards under `outputs/stage2/test_runs/` are local-only (gitignored). The runner is `evals/paid_probes.py`.
-- January to March 2026 decks under `presentation/` are local-only (gitignored). The March findings dashboard stays at `legacy_agent_march_2026/presentation/production_results.html`.
+- January to March 2026 decks under `presentation/` are local-only (gitignored).
 - SGS hill-climb 20-co medium digs (measurement probe): `outputs/stage2/test_runs/sgs_hillclimb_20_medium/`
 - SGS 5-co low-scout A/B smoke (measurement; later locked as default): `outputs/stage2/test_runs/sgs_smoke_5co_low_scouts/`
 - Agent rule: `.cursor/rules/decision-log.mdc`
@@ -53,7 +53,7 @@ Human: skim this file when writing the paper/portfolio narrative. Agents: update
 - Stage 3 e2e5 smoke: `outputs/stage3/smokes/20260815_203606_e2e5/`
 - Stage 3 bulletproof e2e5: `outputs/stage3/smokes/20260815_2218_e2e5_bp/`
 - Stage 3 e2e5 after lenient judge: `outputs/stage3/smokes/20260815_2245_e2e5_bp_lenient/`
-- March 2026 snapshot (runnable, not imported by live code): `legacy_agent_march_2026/`
+- March deep-research agent removed from the tree. Unified Adaptive Search still loads `prompts/stage_2_perplexity_prompt.txt`. Panel rebuilds still read local `evals/references/march_2026_production.jsonl`.
 - Frozen March dump for panel rebuilds (local, not in git): `evals/references/march_2026_production.jsonl`
 - Production batch runner: `production/` (`python -m production {run,dry-run,status,dedupe,verify}`)
 - Production writes (local, gitignored): `outputs/prod/{sgs,pcs,uas}/`
@@ -1241,6 +1241,7 @@ Second fetch order: **superseded by [[2026-08-15: Tavily Extract is the only pai
 - [x] Confirm-medium runner skips only success JSON and detects 429 from the error field (see [[2026-08-15: Confirm-medium runner no longer locks failed JSON or false 429s]])
 - [x] 3-arch bake-off skipped: SGS is the production Stage 2 architecture (see [[2026-08-16: Skip bake-off, ship SGS on the full prod set]])
 - [x] Park March agent in `legacy_agent_march_2026/` (see [[2026-08-16: March agent retired to legacy_agent_march_2026]])
+- [x] Remove the March deep-research agent from the tree (see [[2026-10-05: Remove the March deep-research agent]])
 - [x] SGS production batch runner on branch `prod_runner` after this PR merges (see [[2026-08-16: Skip bake-off, ship SGS on the full prod set]] and [[2026-08-16: PR2 production runner landed]])
 - [x] Re-land the production runner on `main` by reverting the accidental-merge revert (see [[2026-08-16: Re-land production runner on main]])
 - [x] Persist raw findings, then write a derived syndication squash (keep duty splits) on its own branch. See [[2026-08-16: Save raw findings, dedupe as a derived view]] and [[2026-08-16: Production dedupe is a derived CSV]]
@@ -1371,6 +1372,8 @@ Second fetch order: **superseded by [[2026-08-15: Tavily Extract is the only pai
 ---
 
 ## 2026-08-16: March agent retired to legacy_agent_march_2026
+
+**Status:** the snapshot folder is superseded by [[2026-10-05: Remove the March deep-research agent]]. Unified Adaptive Search still loads `prompts/stage_2_perplexity_prompt.txt`. Panel rebuilds still read local `evals/references/march_2026_production.jsonl`.
 
 **Decision:** Move the March 2026 production system into a root-level runnable snapshot, `legacy_agent_march_2026/`. Copy shared Stage 1 (live Stage 1 stays). Move March-only Stage 2 (runner, A/B scripts, dashboard). Live code must not import that folder. Panel rebuilds read a frozen copy at `evals/references/march_2026_production.jsonl` (local, ~69MB, not in git). `prompts/stage_2_perplexity_prompt.txt` stays in the live tree because UAS still loads it. PR1 branch is `retire-legacy`. PR2 (`prod_runner`) starts only after this merges to `main`.
 
@@ -1542,7 +1545,7 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 
 ## 2026-08-20: Licensed dumps stay local, samples stay in git
 
-**Status:** the `summary.jsonl` half is superseded by [[2026-10-05: Stop tracking decks and scoreboards]]. Licensed dumps stay local. Samples stay in git.
+**Status:** the `summary.jsonl` half is superseded by [[2026-10-05: Stop tracking decks and scoreboards]]. Deleting `legacy_agent_march_2026/` is superseded by [[2026-10-05: Remove the March deep-research agent]]. Licensed dumps stay local. Samples stay in git.
 
 **Decision:** Stop tracking the Crunchbase input dumps and keep production / Stage 3 result files local. Ship fictional schema samples instead. Eval `summary.jsonl` scoreboards stay in git. No `CITATION.cff` in this pass. No history rewrite unless Crunchbase or the PI asks.
 
@@ -1558,7 +1561,7 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 
 ## 2026-10-05: Execute hygiene as six pull requests
 
-**Status:** item 5's "keep every `summary.jsonl`" is superseded by [[2026-10-05: Stop tracking decks and scoreboards]].
+**Status:** item 5's "keep every `summary.jsonl`" is superseded by [[2026-10-05: Stop tracking decks and scoreboards]]. The rejected delete of `legacy_agent_march_2026/` is superseded by [[2026-10-05: Remove the March deep-research agent]].
 
 **Decision:** Run the portfolio cleanup as six pull requests, in this order.
 
@@ -1639,6 +1642,8 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 
 ## 2026-10-05: README describes the live commands
 
+**Status:** the March dashboard sentence is superseded by [[2026-10-05: Remove the March deep-research agent]]. The live-command half stays.
+
 **Decision:** `README.md` describes `python -m production`, default architecture `sgs`, citation checks through `python -m production verify` and `python -m citation_verification`, and an SGS planning band of about $0.16 per company. The March 2026 run stays labeled as that run. It produced 2,062 findings. The dashboard is `legacy_agent_march_2026/presentation/production_results.html`. An unread citation page stays null.
 
 **Why:** The old readme still told a reader to run the eval stub commands and to treat the March unit cost as the current one.
@@ -1653,6 +1658,8 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 
 ## 2026-10-05: Stop tracking decks and scoreboards
 
+**Status:** the "March dashboard stays tracked" sentence is superseded by [[2026-10-05: Remove the March deep-research agent]].
+
 **Decision:** Git does not track the four HTML decks in `presentation/`. Git does not track `outputs/stage2/test_runs/**/summary.jsonl`. `evals/instances/` stays ignored except `.gitkeep`. Delete `requirements.txt`. The March dashboard `legacy_agent_march_2026/presentation/production_results.html` stays tracked. Install stays `python -m pip install -e ".[dev]"` from `pyproject.toml`.
 
 **Why:** Khaled asked to ignore the dashboards, the eval instances, the summary runs, and the stale requirements file. A portfolio clone should not carry the January to March decks or the probe scoreboards. The March findings dashboard is the one the readme still links.
@@ -1660,5 +1667,19 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 **Evidence:** `.gitignore`. `docs/DATA.md`. `presentation/README.md`. `tests/test_packaging.py`. `tests/test_paid_probes.py`. `tests/test_hygiene_subtract.py`.
 
 **Alternatives rejected:** Keeping `sgs_hillclimb_20_matched/summary.jsonl` and `sgs_skip_50/summary.jsonl` because the readme cites their means. Deleting `legacy_agent_march_2026/presentation/production_results.html`. Rewriting git history.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.
+
+---
+
+## 2026-10-05: Remove the March deep-research agent
+
+**Decision:** Delete `legacy_agent_march_2026/`. The portfolio tree keeps `signal_gated_search`, `parallel_channel_search`, and `unified_adaptive_search`. `src/stage_2/` still exits, and the message names `python -m production`. Unified Adaptive Search still loads `prompts/stage_2_perplexity_prompt.txt`. Panel rebuilds still read local `evals/references/march_2026_production.jsonl`. Git history is unchanged.
+
+**Why:** Khaled asked to remove the first agent. That folder was the March Perplexity `deep-research` batch runner, parked on 2026-08-16 and still present. The three later architectures are the live batch.
+
+**Evidence:** `tests/test_march_reference_path.py`. `prompts/stage_2_perplexity_prompt.txt`. `evals/paths.py` `MARCH_STAGE2_JSONL`.
+
+**Alternatives rejected:** Keeping the snapshot folder. Moving `prompts/stage_2_perplexity_prompt.txt` out of the live tree. Rewriting git history.
 
 **Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.

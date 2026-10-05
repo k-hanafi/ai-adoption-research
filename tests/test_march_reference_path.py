@@ -1,4 +1,4 @@
-"""Live March refs stay under evals/, never the snapshot folder."""
+"""Panel rebuilds read the local March dump. The March agent is not in this repo."""
 
 import subprocess
 from pathlib import Path
@@ -25,8 +25,8 @@ def _assert_moved_exit(main) -> None:
         message = str(exc)
     else:
         raise AssertionError("retired March command must exit instead of calling the API")
-    assert "legacy_agent_march_2026" in message
-    assert "PYTHONPATH=." in message
+    assert "python -m production" in message
+    assert "legacy_agent_march_2026" not in message
 
 
 def test_live_march_runner_command_explains_the_move() -> None:
@@ -61,20 +61,11 @@ def test_live_python_does_not_import_march_snapshot() -> None:
     assert hits == []
 
 
-def _git_ignores(rel_path: str) -> bool:
-    """True when `git check-ignore` would skip this path (file need not exist)."""
-    result = subprocess.run(
-        ["git", "check-ignore", "-q", "--", rel_path],
+def test_march_snapshot_is_not_tracked() -> None:
+    tracked = subprocess.check_output(
+        ["git", "ls-files", "legacy_agent_march_2026"],
         cwd=PROJECT_ROOT,
-        check=False,
+        text=True,
     )
-    return result.returncode == 0
-
-
-def test_snapshot_secrets_and_runtime_files_are_gitignored() -> None:
-    assert _git_ignores("legacy_agent_march_2026/credentials/perplexity_api_key.txt")
-    assert _git_ignores("legacy_agent_march_2026/logs/run.log")
-    assert _git_ignores("legacy_agent_march_2026/checkpoints/progress.json")
-    assert not _git_ignores(
-        "legacy_agent_march_2026/credentials/perplexity_api_key.txt.template"
-    )
+    assert tracked == ""
+    assert not (PROJECT_ROOT / "legacy_agent_march_2026").exists()

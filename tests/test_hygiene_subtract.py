@@ -75,7 +75,7 @@ def test_decks_scoreboards_and_requirements_are_not_tracked() -> None:
     assert not any(
         path.startswith("presentation/") and path.endswith(".html") for path in tracked
     )
-    assert "legacy_agent_march_2026/presentation/production_results.html" in tracked
+    assert not any(path.startswith("legacy_agent_march_2026/") for path in tracked)
     assert not any(path.endswith("/summary.jsonl") for path in tracked)
     instances = [path for path in tracked if path.startswith("evals/instances/")]
     assert instances == ["evals/instances/.gitkeep"]
@@ -110,5 +110,8 @@ def test_agents_md_names_the_live_command() -> None:
     text = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
     assert "python -m production" in text
     assert "default architecture is `sgs`" in text
-    assert "legacy_agent_march_2026" in text
+    assert "signal_gated_search" in text
+    assert "parallel_channel_search" in text
+    assert "unified_adaptive_search" in text
+    assert "legacy_agent_march_2026" not in text
     assert "python -m pytest -q" in text

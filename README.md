@@ -2,8 +2,6 @@
 
 This repo measures generative-AI use inside startups. The live batch command is `python -m production`. Run it from the checkout root. `python -m` runs that module with the same interpreter you use for the install below. The default architecture is Signal Gated Search (`sgs`). The editable install pulls dependencies. It does not install these packages. `pyproject.toml` sets `packages = []`.
 
-The March 2026 production run is frozen in `legacy_agent_march_2026/`. Live code does not import that folder.
-
 ## Install and test
 
 ```bash
@@ -47,10 +45,6 @@ Plan a full SGS batch at about $0.16 per company. The hill-climb 20 mean was $0.
 
 `python -m evals.paid_probes` lists the historical probes and exits 2. It calls the Agent API only when you pass a probe name and `--live`. Five early SGS folders still refuse `--live`, because their scoreboards used an older scout preset or a shallower dig.
 
-## March 2026 run
-
-That run produced 2,062 findings. The dashboard is [`legacy_agent_march_2026/presentation/production_results.html`](legacy_agent_march_2026/presentation/production_results.html). The proposal and stage decks under `presentation/` are not in git.
-
 ## Where the code lives
 
 | Path | Role |
@@ -65,6 +59,7 @@ That run produced 2,062 findings. The dashboard is [`legacy_agent_march_2026/pre
 | `src/stage_1/` | Website check and priority score |
 | `citation_verification/` | Page fetch and citation judge |
 | `evals/` | Tuning, cost preview, and paid-probe re-runs |
-| `legacy_agent_march_2026/` | Frozen March 2026 agent |
+
+The proposal and stage decks under `presentation/` are not in git.
 
 Put keys in `credentials/*.txt` or the matching environment variable. The tracked templates are `credentials/*.txt.template`. A credentials file wins over the environment variable.

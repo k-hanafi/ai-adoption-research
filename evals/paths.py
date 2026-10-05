@@ -23,7 +23,6 @@ PCS_CONFIRM_PANEL_PATH = PANEL_DIR / "pcs_confirm_panel.json"
 # SGS skip-rate set: March none/low only. Disjoint from the three panels above. Not bake-off.
 SGS_SKIP_PANEL_PATH = PANEL_DIR / "sgs_skip_panel.json"
 # Frozen March Stage 2 dump for panel rebuilds (local copy, not in git).
-# Do not point this at legacy_agent_march_2026/.
 MARCH_STAGE2_JSONL = (
     EVALS_PACKAGE_DIR / "references" / "march_2026_production.jsonl"
 )
