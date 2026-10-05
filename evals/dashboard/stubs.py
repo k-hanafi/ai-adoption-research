@@ -1,4 +1,4 @@
-"""Stub dashboards for archive categories not fully wired yet."""
+"""Dashboard HTML for an archive row that has no scored panel."""
 
 from __future__ import annotations
 
@@ -16,12 +16,12 @@ _STUB_COPY = {
         "~$0.10/company constraint, and a winner under that budget."
     ),
     "benchmark": (
-        "Benchmark instances will compare UAS / PCS / SGS on a held-out paired "
-        "panel (Phase 3 bake-off). Not wired in this MVP."
+        "The bake-off was skipped. Production Stage 2 is Signal Gated Search "
+        "through python -m production."
     ),
     "verification": (
-        "Verification instances will run the Stage 3 citation judge. "
-        "Not wired in this MVP."
+        "Citation checks run through python -m production verify and "
+        "python -m citation_verification."
     ),
 }
 

@@ -190,7 +190,7 @@ def _execute_fetch_once(
 ) -> FetchResult:
     from perplexity import Perplexity
 
-    from unified_adaptive_search.agent_call import require_api_key
+    from agent_api.client import require_api_key
 
     key = require_api_key(api_key)
     client = Perplexity(api_key=key, max_retries=0)

@@ -36,14 +36,3 @@ def dig_config_label(reasoning_effort: str) -> str:
         f"{model_tag}_steps{DEFAULT_DIG_MAX_STEPS}_"
         f"{reasoning_effort}_search_{DEFAULT_DIG_WEB_SEARCH_DEPTH}"
     )
-
-# Unused for dig selection (dig-all signaled). Kept for traces / Top-1 ablation.
-DEFAULT_CHANNEL_PRIOR = {
-    "owned": 1.0,
-    "jobs": 0.8,
-    "third_party": 0.6,
-}
-
-# Legacy stub-runner labels (not bake-off defaults).
-DEFAULT_DIG_PRESET = "medium"
-DEFAULT_RESCUE_DIG_PRESET = "low"

@@ -8,7 +8,6 @@ import sys
 import webbrowser
 from pathlib import Path
 
-from evals.archive import create_stub_instance
 from evals.architectures import ARCHITECTURES, ALIASES, resolve_architecture
 from evals.cost_preview import preview_cost, preview_matrix
 from evals.dashboard.landing import ensure_landing_stub
@@ -55,31 +54,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="Paid UAS matrix (metered Agent API; requires key; dry is default)",
     )
 
-    bench_p = sub.add_parser(
+    sub.add_parser(
         "run-benchmarks",
-        help="Archive a benchmark instance (stub until Phase 3 bake-off).",
+        help="Exit 2. The bake-off was skipped.",
     )
-    bench_p.add_argument("architecture", help=_architecture_help())
-    bench_p.add_argument(
-        "--live",
-        action="store_true",
-        help="Mark instance as live (paid path not wired yet)",
-    )
-
-    ver_p = sub.add_parser(
+    sub.add_parser(
         "run-verification",
-        help="Archive a verification instance (stub until Stage 3 judge).",
-    )
-    ver_p.add_argument(
-        "architecture",
-        nargs="?",
-        default=None,
-        help="Optional architecture key/alias for metadata",
-    )
-    ver_p.add_argument(
-        "--live",
-        action="store_true",
-        help="Mark instance as live (paid path not wired yet)",
+        help="Exit 2. Citation checks use production verify.",
     )
 
     diag_p = sub.add_parser(
@@ -182,38 +163,13 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Dashboard: {instance_dir / 'dashboard.html'}")
         return 0
 
-    if args.command == "run-benchmarks":
-        spec = resolve_architecture(args.architecture)
-        instance_dir = create_stub_instance(
-            kind="benchmark",
-            cli=cli,
-            architecture=spec.cli_key,
-            full_name=spec.full_name,
-            dry_run=not args.live,
-            notes="Stub. Paired bake-off not wired.",
+    if args.command in ("run-benchmarks", "run-verification"):
+        print(
+            "error: the bake-off was skipped. Citation checks run through "
+            "`python -m production verify` and `python -m citation_verification`.",
+            file=sys.stderr,
         )
-        print(f"Wrote benchmark instance to: {instance_dir}")
-        print(f"Dashboard: {instance_dir / 'dashboard.html'}")
-        return 0
-
-    if args.command == "run-verification":
-        architecture = None
-        full_name = None
-        if args.architecture:
-            spec = resolve_architecture(args.architecture)
-            architecture = spec.cli_key
-            full_name = spec.full_name
-        instance_dir = create_stub_instance(
-            kind="verification",
-            cli=cli,
-            architecture=architecture,
-            full_name=full_name,
-            dry_run=not args.live,
-            notes="Stub. Stage 3 judge not wired.",
-        )
-        print(f"Wrote verification instance to: {instance_dir}")
-        print(f"Dashboard: {instance_dir / 'dashboard.html'}")
-        return 0
+        return 2
 
     if args.command == "cost-diagnose":
         if args.live:

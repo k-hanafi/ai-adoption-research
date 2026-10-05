@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Mapping, Optional
 
 from citation_verification import config
+from src.keys import APIKeys
 from citation_verification.limits import call_with_429_retry, judge_limiter
 from citation_verification.schema import judge_text_format
 
@@ -182,8 +183,6 @@ def require_openai_api_key(api_key: Optional[str] = None) -> str:
     """Resolve OpenAI key from arg, credentials file, or env."""
     if api_key:
         return api_key
-    from src.config import APIKeys
-
     key = APIKeys().openai
     if not key:
         raise RuntimeError(

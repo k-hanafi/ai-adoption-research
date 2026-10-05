@@ -191,8 +191,6 @@ def run_panel(
     dashboard_html = _stub_dashboard_html(spec.full_name, spec.cli_key, run_id, scored)
     (run_dir / "dashboard.html").write_text(dashboard_html, encoding="utf-8")
 
-    # Professor-facing archive lives in evals/instances/ via run-tuning /
-    # run-benchmarks / run-verification. run_panel only writes arm/run bundles.
     status_payload: dict[str, Any] = {"status": "completed", "run_id": run_id}
     (run_dir / "run.log").write_text(
         f"run_id={run_id}\narchitecture={spec.cli_key}\ndry_run={dry_run}\n"

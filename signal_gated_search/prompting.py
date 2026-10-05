@@ -5,8 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional, Union
 
+from contracts.schema import RESPONSE_SCHEMA
 from contracts.types import CompanyInput
-from parallel_channel_search.prompting import RESPONSE_SCHEMA
 from signal_gated_search.channels import CHANNEL_IDS
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -27,7 +27,6 @@ _DIG_FILES = {
 
 _prompt_templates: dict[str, str] = {}
 
-# Digs reuse the PCS findings schema so bake-off rows stay comparable.
 DIG_RESPONSE_SCHEMA = RESPONSE_SCHEMA
 
 SCOUT_RESPONSE_SCHEMA = {

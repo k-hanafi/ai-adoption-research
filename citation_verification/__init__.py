@@ -1,6 +1,6 @@
-"""Stage 3 citation verification: fetch page text, then OpenAI logprob judge.
+"""Citation verification. Fetch the page, then judge the citation.
 
-Production package. Evals may import it later; implementation does not live under evals/.
+Production package. Evals may import it. The implementation does not live under evals/.
 """
 
 from citation_verification.runner import verify_finding, verify_findings

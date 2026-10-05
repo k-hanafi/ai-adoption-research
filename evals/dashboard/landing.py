@@ -10,10 +10,20 @@ from typing import Any, Optional
 from evals.dashboard.theme import SUITE_CSS
 from evals.paths import EVAL_INSTANCES_DIR, KIND_LABELS, KINDS, LANDING_INDEX_PATH
 
-_EMPTY_CLI = {
-    "tuning": "python -m evals run-tuning uas --stage screen",
-    "benchmark": "python -m evals run-benchmarks uas",
-    "verification": "python -m evals run-verification",
+_EMPTY_NOTE = {
+    "tuning": (
+        "No tuning instances yet. Create one with "
+        "<code>python -m evals run-tuning uas --stage screen</code>."
+    ),
+    "benchmark": (
+        "No benchmark instances. The bake-off was skipped. "
+        "Production runs use <code>python -m production</code>."
+    ),
+    "verification": (
+        "No verification instances. Citation checks run through "
+        "<code>python -m production verify</code> and "
+        "<code>python -m citation_verification</code>."
+    ),
 }
 
 
@@ -57,11 +67,7 @@ def _render_section(kind: str, rows: list[dict[str, Any]]) -> str:
     label = KIND_LABELS[kind]
     count = len(rows)
     if not rows:
-        cmd = html.escape(_EMPTY_CLI[kind])
-        body = (
-            f'<div class="empty">No {html.escape(label.lower())} instances yet. '
-            f"Create one with <code>{cmd}</code>.</div>"
-        )
+        body = f'<div class="empty">{_EMPTY_NOTE[kind]}</div>'
     else:
         parts: list[str] = [
             '<table class="archive-table"><thead><tr>'
@@ -139,11 +145,11 @@ def _render_index(catalog: dict[str, Any]) -> str:
   <div class="appbar-meta">{total} archived</div>
 </header>
 <main class="archive">
-  <p class="lede">Each row is one saved CLI run of
-  <code>run-tuning</code>, <code>run-benchmarks</code>, or
-  <code>run-verification</code>, kept so a scored instance stays viewable after
-  later builds. Click a title to open that instance dashboard. Times use this
-  machine's local timezone.</p>
+  <p class="lede">Each row is one saved eval instance. New rows come from
+  <code>run-tuning</code>. The bake-off was skipped. Citation checks run
+  through <code>python -m production verify</code> and
+  <code>python -m citation_verification</code>. Click a title to open that
+  instance dashboard. Times use this machine's local timezone.</p>
   {sections}
   <footer class="page-footer">Index rewritten {html.escape(rewritten)}.</footer>
 </main>

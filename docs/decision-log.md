@@ -17,13 +17,10 @@ Human: skim this file when writing the paper/portfolio narrative. Agents: update
 ## Related artifacts
 
 - Tuning instance: `evals/instances/tuning/014_2026-08-07_1045/`
-- PCS param lock: `.cursor/plans/pcs-param-lock.md`
-- March channel evidence: `.cursor/plans/pcs-march-channel-evidence.md`
+- PCS equal-depth knobs: `parallel_channel_search/channels.py`
 - PCS prompts: `prompts/parallel_channel_search/`
-- PCS config: `evals/configs/parallel_channel_search.yaml`
-- SGS design freeze: `.cursor/plans/sgs-design.md`
+- SGS knobs: `signal_gated_search/channels.py`
 - SGS scout contracts: `prompts/signal_gated_search/scout_contracts.md`
-- SGS config: `evals/configs/signal_gated_search.yaml`
 - SGS paid 5-co smoke: `outputs/stage2/test_runs/sgs_smoke_5co/`
 - Hill-climb panel (20-co, not bake-off): `evals/panel/hillclimb_panel.json`
 - PCS confirm panel (20-co, not bake-off): `evals/panel/pcs_confirm_panel.json`
@@ -37,13 +34,19 @@ Human: skim this file when writing the paper/portfolio narrative. Agents: update
 - SGS hill-climb 20-co matched leash (low scouts + 50/medium/high digs; vs PCS high): `outputs/stage2/test_runs/sgs_hillclimb_20_matched/`
 - SGS skip panel (50-co March none/low, not bake-off): `evals/panel/sgs_skip_panel.json`
 - SGS skip-rate 50-co live (package defaults): `outputs/stage2/test_runs/sgs_skip_50/`
-- Paid per-company traces under `outputs/stage2/test_runs/` are local-only (gitignored). Runners and `summary.jsonl` stay in git.
+- Paid per-company traces and `summary.jsonl` scoreboards under `outputs/stage2/test_runs/` are local-only (gitignored). The runner is `evals/paid_probes.py`.
+- January to March 2026 decks under `presentation/` are local-only (gitignored).
 - SGS hill-climb 20-co medium digs (measurement probe): `outputs/stage2/test_runs/sgs_hillclimb_20_medium/`
 - SGS 5-co low-scout A/B smoke (measurement; later locked as default): `outputs/stage2/test_runs/sgs_smoke_5co_low_scouts/`
 - Agent rule: `.cursor/rules/decision-log.mdc`
-- Stage 3 verification plan: `.cursor/plans/phase-2-stage3-verification.plan.md`
-- Stage 3 bulletproof plan: `.cursor/plans/bulletproof-citation-verifier.plan.md`
-- Stage 3 package: `citation_verification/` (production; not under `evals/`)
+- Agent brief: `AGENTS.md`
+- Portfolio readme: `README.md`
+- Packaging: `pyproject.toml`, `.github/workflows/pytest.yml`
+- API keys: `src/keys.py`
+- Perplexity client: `agent_api/client.py`
+- Findings schema: `contracts/schema.py`
+- Names: low-signal data filtering is `src/stage_1/`. Research agents are `signal_gated_search/`, `parallel_channel_search/`, and `unified_adaptive_search/`. Citation verification is `citation_verification/`.
+- Citation verification package: `citation_verification/` (production; not under `evals/`)
 - Stage 3 judge prompt: `prompts/citation_verification/judge.txt`
 - Stage 3 CLI outputs: `python -m citation_verification --output-jsonl` / `--output-csv`
 - Stage 3 gold e2e: `outputs/stage3/smokes/20260815_2100_gold_e2e/`
@@ -51,12 +54,10 @@ Human: skim this file when writing the paper/portfolio narrative. Agents: update
 - Stage 3 e2e5 smoke: `outputs/stage3/smokes/20260815_203606_e2e5/`
 - Stage 3 bulletproof e2e5: `outputs/stage3/smokes/20260815_2218_e2e5_bp/`
 - Stage 3 e2e5 after lenient judge: `outputs/stage3/smokes/20260815_2245_e2e5_bp_lenient/`
-- March 2026 snapshot (runnable, not imported by live code): `legacy_agent_march_2026/`
+- March deep-research agent removed from the tree. Unified Adaptive Search still loads `prompts/stage_2_perplexity_prompt.txt`. Panel rebuilds still read local `evals/references/march_2026_production.jsonl`.
 - Frozen March dump for panel rebuilds (local, not in git): `evals/references/march_2026_production.jsonl`
 - Production batch runner: `production/` (`python -m production {run,dry-run,status,dedupe,verify}`)
 - Production writes (local, gitignored): `outputs/prod/{sgs,pcs,uas}/`
-- Public schema samples (fictional): `crunchbase_data/sample/`, `outputs/prod/sample/`
-- Data inventory: `docs/DATA.md`
 - Public schema samples (fictional): `crunchbase_data/sample/`, `outputs/prod/sample/`
 - Data inventory: `docs/DATA.md`
 - Production verify branch: `prod-verifier` (worktree `deep-research-AI-agent-verifier`)
@@ -996,6 +997,8 @@ Scout tax mean **$0.020**/co ($0.984). Dig spend mean $0.137 ($6.867). Owned lit
 
 ## 2026-08-15: Paid per-company traces stay local, not in git
 
+**Status:** the `*.py` runner half is superseded by [[2026-10-05: One paid-probe script]]. The `summary.jsonl` half is superseded by [[2026-10-05: Stop tracking decks and scoreboards]]. Per-company JSON stays local.
+
 **Decision:** Drop per-company Agent JSON (and `test_results.csv`) from git. Keep runners (`*.py`) and `summary.jsonl` scoreboards. `.gitignore` no longer un-ignores `outputs/stage2/test_runs/**/*.json`.
 
 **Why:** One commit of traces was ~150k lines. That makes review, clone, and checkout painful, and the numbers already live in `summary.jsonl` plus this log. Traces stay on disk for local debugging.
@@ -1165,6 +1168,8 @@ Second fetch order: **superseded by [[2026-08-15: Tavily Extract is the only pai
 - A fourth competing Stage 2 architecture identity (Stage 3 is arch-agnostic verification, not a research strategy)
 - Separate eval-only and prod-only judges (drift risk)
 
+**Status:** The package home is still current. The follow-up that wires `python -m evals run-verification` is superseded by [[2026-10-05: Drop unused eval stubs and unread knobs]].
+
 **Open follow-ups:** Implement `citation_verification/` (fetch + OpenAI logprob judge); wire `python -m evals run-verification` as a consumer; retire or thin-wrap `evals/hooks/stage3_judge.py`.
 
 ---
@@ -1196,7 +1201,7 @@ Second fetch order: **superseded by [[2026-08-15: Tavily Extract is the only pai
 - [x] CLI `--live` entrypoint for one-company smoke
 - [x] Tiny paid smoke to confirm 3× metered cost ≈ projection (Jam `$0.070`)
 - [x] Optional Stage B-style probe: PCS 3× high on the 20-co hill-climb panel (mean $0.165, not a default lock; see [[2026-08-14: PCS 20-co 3× high cost probe]])
-- [x] Lock UAS **bake-off** knobs: `reasoning_effort=xhigh` in package default + `evals/configs/unified_adaptive_search.yaml` (see [[2026-08-13: Bake-off effort lock (UAS xhigh, PCS 3× medium, SGS digs high)]])
+- [x] Lock UAS bake-off knobs: `reasoning_effort=xhigh` in `unified_adaptive_search/agent_call.py` (see [[2026-08-13: Bake-off effort lock (UAS xhigh, PCS 3× medium, SGS digs high)]])
 - [x] SGS **design** freeze (dig-all signaled. Effort table superseded: SGS digs high, not 1=max)
 - [x] SGS digs = **high** on every signaled channel (see [[2026-08-13: Bake-off effort lock (UAS xhigh, PCS 3× medium, SGS digs high)]])
 - [x] SGS scout semantics = **presence screen** (see [[2026-08-11: SGS scouts are channel presence screens]])
@@ -1237,6 +1242,7 @@ Second fetch order: **superseded by [[2026-08-15: Tavily Extract is the only pai
 - [x] Confirm-medium runner skips only success JSON and detects 429 from the error field (see [[2026-08-15: Confirm-medium runner no longer locks failed JSON or false 429s]])
 - [x] 3-arch bake-off skipped: SGS is the production Stage 2 architecture (see [[2026-08-16: Skip bake-off, ship SGS on the full prod set]])
 - [x] Park March agent in `legacy_agent_march_2026/` (see [[2026-08-16: March agent retired to legacy_agent_march_2026]])
+- [x] Remove the March deep-research agent from the tree (see [[2026-10-05: Remove the March deep-research agent]])
 - [x] SGS production batch runner on branch `prod_runner` after this PR merges (see [[2026-08-16: Skip bake-off, ship SGS on the full prod set]] and [[2026-08-16: PR2 production runner landed]])
 - [x] Re-land the production runner on `main` by reverting the accidental-merge revert (see [[2026-08-16: Re-land production runner on main]])
 - [x] Persist raw findings, then write a derived syndication squash (keep duty splits) on its own branch. See [[2026-08-16: Save raw findings, dedupe as a derived view]] and [[2026-08-16: Production dedupe is a derived CSV]]
@@ -1258,7 +1264,7 @@ Second fetch order: **superseded by [[2026-08-15: Tavily Extract is the only pai
 - [x] Lenient Terra judge; no literal-anchor `null` (see [[2026-08-15: Lenient judge, no literal-anchor null]])
 - [x] Re-run 14-row e2e5_bp after the lenient-judge change (14×`1`, $0.491; see `outputs/stage3/smokes/20260815_2245_e2e5_bp_lenient/`)
 - [ ] WS9 live expanded gold re-score (paid, Khaled spend approval). Do not start Phase B 221+124 first.
-- [ ] Later (separate plan): evals `run-verification` consumer + eval-set quality gates
+- [x] Evals `run-verification` stays unwired. Citation checks use `python -m production verify` (see [[2026-10-05: Drop unused eval stubs and unread knobs]])
 - [x] Paid verify `--limit 20` smoke after adaptive finding-level concurrency (see [[2026-08-17: Verify is finding-level with adaptive API caps]])
 - [x] Licensed Crunchbase dumps and production result files stay local (see [[2026-08-20: Licensed dumps stay local, samples stay in git]])
 
@@ -1367,6 +1373,8 @@ Second fetch order: **superseded by [[2026-08-15: Tavily Extract is the only pai
 ---
 
 ## 2026-08-16: March agent retired to legacy_agent_march_2026
+
+**Status:** the snapshot folder is superseded by [[2026-10-05: Remove the March deep-research agent]]. Unified Adaptive Search still loads `prompts/stage_2_perplexity_prompt.txt`. Panel rebuilds still read local `evals/references/march_2026_production.jsonl`.
 
 **Decision:** Move the March 2026 production system into a root-level runnable snapshot, `legacy_agent_march_2026/`. Copy shared Stage 1 (live Stage 1 stays). Move March-only Stage 2 (runner, A/B scripts, dashboard). Live code must not import that folder. Panel rebuilds read a frozen copy at `evals/references/march_2026_production.jsonl` (local, ~69MB, not in git). `prompts/stage_2_perplexity_prompt.txt` stays in the live tree because UAS still loads it. PR1 branch is `retire-legacy`. PR2 (`prod_runner`) starts only after this merges to `main`.
 
@@ -1538,6 +1546,8 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 
 ## 2026-08-20: Licensed dumps stay local, samples stay in git
 
+**Status:** the `summary.jsonl` half is superseded by [[2026-10-05: Stop tracking decks and scoreboards]]. Deleting `legacy_agent_march_2026/` is superseded by [[2026-10-05: Remove the March deep-research agent]]. Licensed dumps stay local. Samples stay in git.
+
 **Decision:** Stop tracking the Crunchbase input dumps and keep production / Stage 3 result files local. Ship fictional schema samples instead. Eval `summary.jsonl` scoreboards stay in git. No `CITATION.cff` in this pass. No history rewrite unless Crunchbase or the PI asks.
 
 **Why:** The public GitHub repo was hosting two copies of the ~27MB Crunchbase slice plus the 9,420-row Stage 2 queue. That is a license risk for portfolio viewers and for a paper data-availability statement. Clones still need to see the column layout.
@@ -1547,3 +1557,160 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 **Alternatives rejected:** Copying 20 real Crunchbase rows into the sample (still republishes licensed records). Deleting `legacy_agent_march_2026/`. Gitignoring eval `summary.jsonl` (those are small measurement evidence, not the licensed dump). Rewriting git history in this pass.
 
 **Open follow-ups:** History still contains the old blobs. Ask Jan before any `git filter-repo`. README rewrite later.
+
+---
+
+## 2026-10-05: Execute hygiene as six pull requests
+
+**Status:** item 5's "keep every `summary.jsonl`" is superseded by [[2026-10-05: Stop tracking decks and scoreboards]]. The rejected delete of `legacy_agent_march_2026/` is superseded by [[2026-10-05: Remove the March deep-research agent]].
+
+**Decision:** Run the portfolio cleanup as six pull requests, in this order.
+
+1. `pyproject.toml` and a pytest workflow.
+2. Delete unused eval YAML, one-shot tune scripts, unread knobs, and the eval stub commands. Fix the short docs. Add `AGENTS.md`. Stop tracking `.cursor/plans/`.
+3. Move `APIKeys` to `src/keys.py`.
+4. One Perplexity client, the finding schema in `contracts`, and all three architectures switched to that client.
+5. One paid-probe script. Keep every `summary.jsonl`.
+6. Rewrite `README.md` only after the five above.
+
+**Why:** Fourteen review slices were more pulls than the diff needs. Khaled locked the six on 2026-10-05.
+
+**Evidence:** Eval YAML is 109 lines and no Python loads it. The three one-shot tune scripts are 1,115 lines. The thirteen `run_*.py` scripts are 3,019 lines. The copied clients are `parallel_channel_search/agent_call.py` (336), `unified_adaptive_search/agent_call.py` (359), and `signal_gated_search/agent_call.py` (275).
+
+**Alternatives rejected:** Fourteen pull requests. One pull request for the whole cleanup. Rewriting `README.md` before the tree matches it. Deleting `legacy_agent_march_2026/`. Changing `DEFAULT_WEB_SEARCH_DEPTH` from `low` to `medium`.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.
+
+---
+
+## 2026-10-05: Drop unused eval stubs and unread knobs
+
+**Decision:** Delete the seven eval YAML files, the three one-shot tune scripts, the unread PCS and SGS knobs, and `from_preset_defaults`. `python -m evals run-benchmarks` and `python -m evals run-verification` exit 2 and write nothing. They print that the bake-off was skipped, and that citation checks run through `python -m production verify` and `python -m citation_verification`. Delete `evals/hooks/stage3_judge.py`. Stop tracking `.cursor/plans/`. Add `AGENTS.md`.
+
+**Why:** Those files described a bake-off and a search depth the code does not run. An agent that trusts them will change the wrong knob or call a command that pretends to archive a result.
+
+**Evidence:** No Python loads `evals/configs/`. `from_preset_defaults`, `search_domain_filter`, `instruction_hint`, `DEFAULT_CHANNEL_PRIOR`, `DEFAULT_DIG_PRESET`, and `DEFAULT_RESCUE_DIG_PRESET` had no callers. `judge_finding` had no callers. Test: `tests/test_hygiene_subtract.py`.
+
+**Alternatives rejected:** Leaving the commands as writers of stub dashboards. Keeping `.cursor/plans/` in git. Pointing `run-verification` at `citation_verification`.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`. The README rewrite is pull request 6.
+
+---
+
+## 2026-10-05: API keys load from src/keys.py
+
+**Decision:** Live code loads API keys from `src/keys.py`. `src/config.py` no longer defines `APIKeys` or `_load_credential`. Importing `src/keys` does not import `src/config`, so it does not create output directories. The March snapshot keeps its own copy.
+
+**Why:** Stage 2 and the citation judge were importing `src/config` only to read a key. That import creates `outputs/` and `logs/` as a side effect.
+
+**Evidence:** Callers are the three `agent_call.py` modules, `citation_verification/judge.py`, and `src/stage_1/`. Test: `tests/test_keys.py`.
+
+**Alternatives rejected:** Re-exporting `APIKeys` from `src/config.py`. Editing `legacy_agent_march_2026/src/config.py` to match.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.
+
+---
+
+## 2026-10-05: One Perplexity client and one findings schema
+
+**Decision:** `agent_api/client.py` owns the search-depth ladder, JSON extract, Perplexity key check, and `execute_agent_call`. `contracts/schema.py` owns `RESPONSE_SCHEMA`. PCS, SGS digs, and UAS call that client. SGS scouts call `create_response` in the same module. A JSON parse failure keeps the metered cost. UAS search depth stays `low`. SGS scouts stay preset `low` with `web_search` only. PCS search depth stays `medium`. The three `run()` functions stay separate.
+
+**Why:** The three packages each carried a copy of the same call. A fix to cost handling or the schema had to land three times.
+
+**Evidence:** `tests/test_agent_client.py`. `DIG_RESPONSE_SCHEMA is RESPONSE_SCHEMA`.
+
+**Alternatives rejected:** Three switch pull requests. Changing UAS depth to `medium`. Merging the three `run()` functions.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.
+
+---
+
+## 2026-10-05: One paid-probe script
+
+**Status:** the tracked-`summary.jsonl` half is superseded by [[2026-10-05: Stop tracking decks and scoreboards]]. One script stays.
+
+**Decision:** Delete the thirteen `run_*.py` scripts under `outputs/stage2/test_runs/`. `evals/paid_probes.py` is the re-run entry. Each probe keeps its panel, worker count, effort, and output folder. Every `summary.jsonl` stays tracked. The command exits 2 unless you pass a probe name and `--live`. Five SGS folders still exit 2 with `--live`, because their scoreboards used fast scouts or digs at 10 steps and search depth low, and the package now uses scout preset low and digs at 50 steps with search depth medium. Resume skips a company only when that company's JSON has an empty `error`. A later failure does not replace a successful JSON. The medium-dig probe still records a `medium` dig effort, and it is one of the five that refuse `--live`.
+
+**Why:** The scripts were copies of one loop. The scoreboards are the measurement. A bare command must not spend money.
+
+**Evidence:** `evals/paid_probes.py`. `tests/test_paid_probes.py`. Thirteen `outputs/stage2/test_runs/*/summary.jsonl` files.
+
+**Alternatives rejected:** Leaving the thirteen scripts. Folding the probes into `python -m production`. Deleting `summary.jsonl`.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`. Do not pass `--live` unless Khaled asks.
+
+---
+
+## 2026-10-05: README describes the live commands
+
+**Status:** the March dashboard sentence is superseded by [[2026-10-05: Remove the March deep-research agent]]. The live-command half stays.
+
+**Decision:** `README.md` describes `python -m production`, default architecture `sgs`, citation checks through `python -m production verify` and `python -m citation_verification`, and an SGS planning band of about $0.16 per company. The March 2026 run stays labeled as that run. It produced 2,062 findings. The dashboard is `legacy_agent_march_2026/presentation/production_results.html`. An unread citation page stays null.
+
+**Why:** The old readme still told a reader to run the eval stub commands and to treat the March unit cost as the current one.
+
+**Evidence:** `README.md`. `tests/test_readme.py`.
+
+**Alternatives rejected:** Rewriting the readme before the tree matched it. Putting a license file in this pull request.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.
+
+---
+
+## 2026-10-05: Stop tracking decks and scoreboards
+
+**Status:** the "March dashboard stays tracked" sentence is superseded by [[2026-10-05: Remove the March deep-research agent]].
+
+**Decision:** Git does not track the four HTML decks in `presentation/`. Git does not track `outputs/stage2/test_runs/**/summary.jsonl`. `evals/instances/` stays ignored except `.gitkeep`. Delete `requirements.txt`. The March dashboard `legacy_agent_march_2026/presentation/production_results.html` stays tracked. Install stays `python -m pip install -e ".[dev]"` from `pyproject.toml`.
+
+**Why:** Khaled asked to ignore the dashboards, the eval instances, the summary runs, and the stale requirements file. A portfolio clone should not carry the January to March decks or the probe scoreboards. The March findings dashboard is the one the readme still links.
+
+**Evidence:** `.gitignore`. `docs/DATA.md`. `presentation/README.md`. `tests/test_packaging.py`. `tests/test_paid_probes.py`. `tests/test_hygiene_subtract.py`.
+
+**Alternatives rejected:** Keeping `sgs_hillclimb_20_matched/summary.jsonl` and `sgs_skip_50/summary.jsonl` because the readme cites their means. Deleting `legacy_agent_march_2026/presentation/production_results.html`. Rewriting git history.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.
+
+---
+
+## 2026-10-05: Remove the March deep-research agent
+
+**Status:** the `src/stage_2/` pointer is superseded by [[2026-10-05: Remove the src/stage_2 pointer]].
+
+**Decision:** Delete `legacy_agent_march_2026/`. The portfolio tree keeps `signal_gated_search`, `parallel_channel_search`, and `unified_adaptive_search`. `src/stage_2/` still exits, and the message names `python -m production`. Unified Adaptive Search still loads `prompts/stage_2_perplexity_prompt.txt`. Panel rebuilds still read local `evals/references/march_2026_production.jsonl`. Git history is unchanged.
+
+**Why:** Khaled asked to remove the first agent. That folder was the March Perplexity `deep-research` batch runner, parked on 2026-08-16 and still present. The three later architectures are the live batch.
+
+**Evidence:** `tests/test_march_reference_path.py`. `prompts/stage_2_perplexity_prompt.txt`. `evals/paths.py` `MARCH_STAGE2_JSONL`.
+
+**Alternatives rejected:** Keeping the snapshot folder. Moving `prompts/stage_2_perplexity_prompt.txt` out of the live tree. Rewriting git history.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.
+
+---
+
+## 2026-10-05: Name the three pipeline parts
+
+**Decision:** Call `src/stage_1/` low-signal data filtering. Call `signal_gated_search`, `parallel_channel_search`, and `unified_adaptive_search` the research agents. Call `citation_verification/` citation verification. The paths stay as they are.
+
+**Why:** Khaled named the three parts on 2026-10-05. A folder rename would change every import and every `python -m` command.
+
+**Evidence:** `README.md`. `AGENTS.md`. `src/stage_1/__init__.py`. `citation_verification/__init__.py`.
+
+**Alternatives rejected:** Renaming `src/stage_1/` to a new package. Moving the research agents under `src/`.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.
+
+---
+
+## 2026-10-05: Remove the src/stage_2 pointer
+
+**Decision:** Delete `src/stage_2/` and `src/tests/stage_2/`. Those modules only exited and named `python -m production`. The research agents stay `signal_gated_search`, `parallel_channel_search`, and `unified_adaptive_search`.
+
+**Why:** Khaled said the stage 2 folder should have gone with the March agent. After that agent was deleted, the pointer had no runner to point at.
+
+**Evidence:** `tests/test_march_reference_path.py`. `AGENTS.md`.
+
+**Alternatives rejected:** Leaving the exit stubs so the old module path still prints a message.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.

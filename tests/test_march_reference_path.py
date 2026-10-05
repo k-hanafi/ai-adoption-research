@@ -1,4 +1,4 @@
-"""Live March refs stay under evals/, never the snapshot folder."""
+"""Panel rebuilds read the local March dump. The March agent is not in this repo."""
 
 import subprocess
 from pathlib import Path
@@ -18,27 +18,15 @@ def test_march_jsonl_is_evals_reference_not_legacy_folder() -> None:
     assert "legacy_agent_march_2026" not in str(MARCH_STAGE2_JSONL)
 
 
-def _assert_moved_exit(main) -> None:
-    try:
-        main()
-    except SystemExit as exc:
-        message = str(exc)
-    else:
-        raise AssertionError("retired March command must exit instead of calling the API")
-    assert "legacy_agent_march_2026" in message
-    assert "PYTHONPATH=." in message
-
-
-def test_live_march_runner_command_explains_the_move() -> None:
-    from src.stage_2.production_agent_runner import main
-
-    _assert_moved_exit(main)
-
-
-def test_live_march_preset_command_explains_the_move() -> None:
-    from src.tests.stage_2.run_preset_test import main
-
-    _assert_moved_exit(main)
+def test_march_runner_pointer_is_gone() -> None:
+    assert not (PROJECT_ROOT / "src" / "stage_2").exists()
+    assert not (PROJECT_ROOT / "src" / "tests" / "stage_2").exists()
+    tracked = subprocess.check_output(
+        ["git", "ls-files", "src/stage_2", "src/tests"],
+        cwd=PROJECT_ROOT,
+        text=True,
+    )
+    assert tracked == ""
 
 
 def test_live_python_does_not_import_march_snapshot() -> None:
@@ -61,20 +49,11 @@ def test_live_python_does_not_import_march_snapshot() -> None:
     assert hits == []
 
 
-def _git_ignores(rel_path: str) -> bool:
-    """True when `git check-ignore` would skip this path (file need not exist)."""
-    result = subprocess.run(
-        ["git", "check-ignore", "-q", "--", rel_path],
+def test_march_snapshot_is_not_tracked() -> None:
+    tracked = subprocess.check_output(
+        ["git", "ls-files", "legacy_agent_march_2026"],
         cwd=PROJECT_ROOT,
-        check=False,
+        text=True,
     )
-    return result.returncode == 0
-
-
-def test_snapshot_secrets_and_runtime_files_are_gitignored() -> None:
-    assert _git_ignores("legacy_agent_march_2026/credentials/perplexity_api_key.txt")
-    assert _git_ignores("legacy_agent_march_2026/logs/run.log")
-    assert _git_ignores("legacy_agent_march_2026/checkpoints/progress.json")
-    assert not _git_ignores(
-        "legacy_agent_march_2026/credentials/perplexity_api_key.txt.template"
-    )
+    assert tracked == ""
+    assert not (PROJECT_ROOT / "legacy_agent_march_2026").exists()
