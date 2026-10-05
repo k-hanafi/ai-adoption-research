@@ -1,6 +1,6 @@
 # Parallel Channel Search prompts
 
-**Status:** draft for review (DESIGN ONLY). Not wired into the live PCS runner yet. Not a prod freeze.
+The live PCS runner calls `parallel_channel_search.prompting.build_channel_prompt`.
 
 ## Layout
 
@@ -11,14 +11,12 @@
 | `channel_owned.txt` | Owned specialist contract |
 | `channel_third_party.txt` | Third-party specialist contract |
 
-Compose at runtime via `parallel_channel_search.prompting.build_channel_prompt`: expand `{shared_preamble}` from `shared_preamble.txt`, then fill company fields (`company_id`, `company_name`, `homepage_url`, `short_description`).
+`build_channel_prompt` expands `{shared_preamble}` from `shared_preamble.txt`, then fills `company_id`, `company_name`, `homepage_url`, and `short_description`.
 
 ## Design rules baked in
 
-- Equal-depth specialists; prompt-only targeting (no domain filter allowlists)
-- Each agent knows the overall goal + sibling rooms; no UAS/SGS language
-- Source-shape steering only (where to look), not March finding few-shots (what adoption looks like)
-- Sibling rooms steer **search budget**, not a veto: report qualifying evidence even if off-room; merge dedupes
-- Hard exclude remains use-vs-sell only
-
-Evidence basis: `.cursor/plans/pcs-march-channel-evidence.md`.
+- Equal-depth specialists. Prompts steer the search. There is no domain-filter allowlist.
+- Each agent knows the overall goal and the sibling rooms. The prompt does not mention UAS or SGS.
+- Source-shape steering says where to look. It does not include March finding examples of what adoption looks like.
+- Sibling rooms steer the search budget. They are not a veto. Report qualifying evidence even if it is off-room. Merge dedupes it.
+- The hard exclude is use-versus-sell only.

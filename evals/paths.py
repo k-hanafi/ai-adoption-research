@@ -7,7 +7,6 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 EVALS_PACKAGE_DIR = Path(__file__).resolve().parent
 PANEL_DIR = EVALS_PACKAGE_DIR / "panel"
-CONFIGS_DIR = EVALS_PACKAGE_DIR / "configs"
 
 # Standalone artifact root: archive + per-arm runs live under evals/.
 EVAL_INSTANCES_DIR = EVALS_PACKAGE_DIR / "instances"
@@ -23,7 +22,6 @@ HILLCLIMB_PANEL_PATH = PANEL_DIR / "hillclimb_panel.json"
 PCS_CONFIRM_PANEL_PATH = PANEL_DIR / "pcs_confirm_panel.json"
 # SGS skip-rate set: March none/low only. Disjoint from the three panels above. Not bake-off.
 SGS_SKIP_PANEL_PATH = PANEL_DIR / "sgs_skip_panel.json"
-TUNING_CONFIGS_DIR = CONFIGS_DIR / "tuning"
 # Frozen March Stage 2 dump for panel rebuilds (local copy, not in git).
 # Do not point this at legacy_agent_march_2026/.
 MARCH_STAGE2_JSONL = (

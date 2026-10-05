@@ -1,7 +1,6 @@
 # SGS scout prompt contracts (presence screen)
 
 **Status:** Live Agent instructions are `scout_*.txt`. Presence bar amended 2026-08-13: existence check, not source-quality or adoption.  
-**SoT:** `.cursor/plans/sgs-design.md`  
 **Separation of concerns:** scouts decide **channel source presence**; digs decide **GenAI adoption**. Never ask scouts for adoption findings.
 
 Shared rules for all three contracts:

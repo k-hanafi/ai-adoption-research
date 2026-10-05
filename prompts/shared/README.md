@@ -1,10 +1,12 @@
 # Shared prompts
 
-Reusable prompt blocks for architecture packages.
+Blocks that more than one architecture can read.
 
-Phase 1 still uses the existing Stage 1 / Stage 2 prompt files at the
-`prompts/` root. Per-system override folders exist for later splits:
+Each architecture also has its own folder:
 
 - `prompts/unified_adaptive_search/`
 - `prompts/parallel_channel_search/`
 - `prompts/signal_gated_search/`
+
+Stage 1 reads `prompts/stage_1_classifier.txt`.
+Unified Adaptive Search reads `prompts/stage_2_perplexity_prompt.txt` unless `prompts/unified_adaptive_search/research_prompt.txt` exists.

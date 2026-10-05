@@ -216,26 +216,3 @@ def create_instance(
         save_catalog(catalog)
         rebuild_landing(catalog)
         return instance_dir
-
-
-def create_stub_instance(
-    *,
-    kind: str,
-    cli: str,
-    architecture: Optional[str] = None,
-    full_name: Optional[str] = None,
-    dry_run: bool = True,
-    notes: Optional[str] = None,
-    extra: Optional[dict[str, Any]] = None,
-) -> Path:
-    """Allocate a stub dashboard instance (benchmark / verification / placeholder)."""
-    return create_instance(
-        kind=kind,
-        cli=cli,
-        architecture=architecture,
-        full_name=full_name,
-        dry_run=dry_run,
-        stub=True,
-        notes=notes,
-        extra=extra,
-    )

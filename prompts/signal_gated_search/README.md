@@ -1,10 +1,10 @@
 # Signal Gated Search prompts
 
-**Scout semantics (frozen):** presence screen, not adoption extract.  
-Design card: `.cursor/plans/sgs-design.md`  
+Scout semantics are frozen. A scout is a presence screen, not an adoption extract.
+
 Contracts: [`scout_contracts.md`](./scout_contracts.md)
 
-## Scout prompts (drafted)
+## Scout prompts
 
 | File | Role |
 |---|---|
@@ -13,16 +13,15 @@ Contracts: [`scout_contracts.md`](./scout_contracts.md)
 | `scout_owned.txt` | Owned-room presence overlay |
 | `scout_third_party.txt` | Third-party presence overlay |
 
-Composer will substitute `{shared_preamble}` and company placeholders.  
-API `response_format` will enforce JSON shape; code maps `evidence_bin` → confidence → `signal`.
+`signal_gated_search.prompting.build_scout_prompt` expands `{shared_preamble}` and the company placeholders. The API `response_format` enforces the JSON shape. Code maps `evidence_bin` to confidence, then to `signal`.
 
 ## Dig prompts
 
 | File | Role |
 |---|---|
-| `dig_shared_preamble.txt` | Adoption extract (PCS-like). Cold start. Presence is not adoption. |
+| `dig_shared_preamble.txt` | Adoption extract. Cold start. Presence is not adoption. |
 | `dig_jobs.txt` | Jobs-room extract overlay (PCS `channel_jobs.txt`) |
-| `dig_owned.txt` | Owned-room extract overlay (SGS: site + official accounts; diverges from PCS host-only owned) |
-| `dig_third_party.txt` | Third-party extract overlay (independent narrators; official company accounts are owned) |
+| `dig_owned.txt` | Owned-room extract overlay. SGS includes the site and official accounts. PCS owned is host-only. |
+| `dig_third_party.txt` | Third-party extract overlay. Independent narrators. Official company accounts are owned. |
 
-Dig `response_format` reuses the PCS findings schema. Scout URLs are traces only, not dig input.
+Dig `response_format` reuses the PCS findings schema. Scout URLs are traces only. They are not dig input.

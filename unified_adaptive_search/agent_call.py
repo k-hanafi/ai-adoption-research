@@ -20,7 +20,6 @@ logger = logging.getLogger("unified_adaptive_search.agent_call")
 
 # Pin to Luna unless an override is provided. Bake-off lock: effort xhigh.
 DEFAULT_MODEL = "openai/gpt-5.6-luna"
-# March production used 10; stock medium docs default is 15 (see from_preset_defaults).
 DEFAULT_MAX_STEPS = 10
 DEFAULT_REASONING_EFFORT = "xhigh"
 # Our ladder (not a Perplexity enum): low/medium/high → rising max_tokens.
@@ -53,35 +52,6 @@ _WEB_SEARCH_DEPTH: dict[str, dict[str, Any]] = {
         "max_results": 50,
     },
 }
-
-
-def from_preset_defaults(name: str = "medium") -> dict[str, Any]:
-    """Expand a known preset name into explicit call fields (no `preset` key).
-
-    Convenience for docs / migration only. Eval and tuning arms should pass
-    explicit knobs directly, not sweep `preset=...`.
-    """
-    key = (name or "").strip().lower()
-    if key == "medium":
-        # Current docs freeze for medium: Luna + steps 15 + effort medium +
-        # web_search + fetch_url. UAS baseline arms still use max_steps=10.
-        return {
-            "model": DEFAULT_MODEL,
-            "max_steps": 15,
-            "reasoning_effort": "medium",
-            "web_search_depth": "low",
-        }
-    if key == "low":
-        return {
-            "model": DEFAULT_MODEL,
-            "max_steps": 5,
-            "reasoning_effort": "minimal",
-            "web_search_depth": "low",
-        }
-    raise ValueError(
-        f"Unknown preset defaults {name!r}. "
-        "Supported helpers: medium, low. Prefer passing explicit knobs."
-    )
 
 
 def build_request_kwargs(

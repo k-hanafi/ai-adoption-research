@@ -17,13 +17,10 @@ Human: skim this file when writing the paper/portfolio narrative. Agents: update
 ## Related artifacts
 
 - Tuning instance: `evals/instances/tuning/014_2026-08-07_1045/`
-- PCS param lock: `.cursor/plans/pcs-param-lock.md`
-- March channel evidence: `.cursor/plans/pcs-march-channel-evidence.md`
+- PCS equal-depth knobs: `parallel_channel_search/channels.py`
 - PCS prompts: `prompts/parallel_channel_search/`
-- PCS config: `evals/configs/parallel_channel_search.yaml`
-- SGS design freeze: `.cursor/plans/sgs-design.md`
+- SGS knobs: `signal_gated_search/channels.py`
 - SGS scout contracts: `prompts/signal_gated_search/scout_contracts.md`
-- SGS config: `evals/configs/signal_gated_search.yaml`
 - SGS paid 5-co smoke: `outputs/stage2/test_runs/sgs_smoke_5co/`
 - Hill-climb panel (20-co, not bake-off): `evals/panel/hillclimb_panel.json`
 - PCS confirm panel (20-co, not bake-off): `evals/panel/pcs_confirm_panel.json`
@@ -41,9 +38,8 @@ Human: skim this file when writing the paper/portfolio narrative. Agents: update
 - SGS hill-climb 20-co medium digs (measurement probe): `outputs/stage2/test_runs/sgs_hillclimb_20_medium/`
 - SGS 5-co low-scout A/B smoke (measurement; later locked as default): `outputs/stage2/test_runs/sgs_smoke_5co_low_scouts/`
 - Agent rule: `.cursor/rules/decision-log.mdc`
+- Agent brief: `AGENTS.md`
 - Packaging: `pyproject.toml`, `.github/workflows/pytest.yml`
-- Stage 3 verification plan: `.cursor/plans/phase-2-stage3-verification.plan.md`
-- Stage 3 bulletproof plan: `.cursor/plans/bulletproof-citation-verifier.plan.md`
 - Stage 3 package: `citation_verification/` (production; not under `evals/`)
 - Stage 3 judge prompt: `prompts/citation_verification/judge.txt`
 - Stage 3 CLI outputs: `python -m citation_verification --output-jsonl` / `--output-csv`
@@ -56,8 +52,6 @@ Human: skim this file when writing the paper/portfolio narrative. Agents: update
 - Frozen March dump for panel rebuilds (local, not in git): `evals/references/march_2026_production.jsonl`
 - Production batch runner: `production/` (`python -m production {run,dry-run,status,dedupe,verify}`)
 - Production writes (local, gitignored): `outputs/prod/{sgs,pcs,uas}/`
-- Public schema samples (fictional): `crunchbase_data/sample/`, `outputs/prod/sample/`
-- Data inventory: `docs/DATA.md`
 - Public schema samples (fictional): `crunchbase_data/sample/`, `outputs/prod/sample/`
 - Data inventory: `docs/DATA.md`
 - Production verify branch: `prod-verifier` (worktree `deep-research-AI-agent-verifier`)
@@ -1259,7 +1253,7 @@ Second fetch order: **superseded by [[2026-08-15: Tavily Extract is the only pai
 - [x] Lenient Terra judge; no literal-anchor `null` (see [[2026-08-15: Lenient judge, no literal-anchor null]])
 - [x] Re-run 14-row e2e5_bp after the lenient-judge change (14×`1`, $0.491; see `outputs/stage3/smokes/20260815_2245_e2e5_bp_lenient/`)
 - [ ] WS9 live expanded gold re-score (paid, Khaled spend approval). Do not start Phase B 221+124 first.
-- [ ] Later (separate plan): evals `run-verification` consumer + eval-set quality gates
+- [x] Evals `run-verification` stays unwired. Citation checks use `python -m production verify` (see [[2026-10-05: Drop unused eval stubs and unread knobs]])
 - [x] Paid verify `--limit 20` smoke after adaptive finding-level concurrency (see [[2026-08-17: Verify is finding-level with adaptive API caps]])
 - [x] Licensed Crunchbase dumps and production result files stay local (see [[2026-08-20: Licensed dumps stay local, samples stay in git]])
 
@@ -1569,3 +1563,17 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 **Alternatives rejected:** Fourteen pull requests. One pull request for the whole cleanup. Rewriting `README.md` before the tree matches it. Deleting `legacy_agent_march_2026/`. Changing `DEFAULT_WEB_SEARCH_DEPTH` from `low` to `medium`.
 
 **Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.
+
+---
+
+## 2026-10-05: Drop unused eval stubs and unread knobs
+
+**Decision:** Delete the seven eval YAML files, the three one-shot tune scripts, the unread PCS and SGS knobs, and `from_preset_defaults`. `python -m evals run-benchmarks` and `python -m evals run-verification` exit 2 and write nothing. They print that the bake-off was skipped, and that citation checks run through `python -m production verify` and `python -m citation_verification`. Delete `evals/hooks/stage3_judge.py`. Stop tracking `.cursor/plans/`. Add `AGENTS.md`.
+
+**Why:** Those files described a bake-off and a search depth the code does not run. An agent that trusts them will change the wrong knob or call a command that pretends to archive a result.
+
+**Evidence:** No Python loads `evals/configs/`. `from_preset_defaults`, `search_domain_filter`, `instruction_hint`, `DEFAULT_CHANNEL_PRIOR`, `DEFAULT_DIG_PRESET`, and `DEFAULT_RESCUE_DIG_PRESET` had no callers. `judge_finding` had no callers. Test: `tests/test_hygiene_subtract.py`.
+
+**Alternatives rejected:** Leaving the commands as writers of stub dashboards. Keeping `.cursor/plans/` in git. Pointing `run-verification` at `citation_verification`.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`. The README rewrite is pull request 6.

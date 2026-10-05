@@ -1,8 +1,4 @@
-"""Prompt loading for UAS (lineage: prompts/stage_2_perplexity_prompt.txt).
-
-Phase 1 keeps the March production habit of a single formatted prompt string.
-A later split into lean `instructions` + company `input` is planned (§3.3).
-"""
+"""Prompt loading for UAS. Default file is prompts/stage_2_perplexity_prompt.txt."""
 
 from __future__ import annotations
 

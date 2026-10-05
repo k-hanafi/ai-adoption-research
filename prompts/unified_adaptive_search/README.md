@@ -1,7 +1,5 @@
 # Unified Adaptive Search prompts
 
-Default lineage for Phase 1: `prompts/stage_2_perplexity_prompt.txt`
-(same contract as March Stage 2 production).
+The live prompt is `prompts/stage_2_perplexity_prompt.txt`.
 
-Optional override: place `research_prompt.txt` in this folder to replace
-the default without deleting the Stage 2 file (March outputs stay rebuildable).
+To override it, add `research_prompt.txt` in this folder. Leave the Stage 2 file in place. `unified_adaptive_search.prompting.resolve_prompt_path` checks the override first.

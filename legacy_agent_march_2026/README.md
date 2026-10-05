@@ -3,9 +3,7 @@
 This folder is a **runnable copy** of the first production system: Stage 1
 filter plus the March Stage 2 Perplexity `deep-research` batch runner.
 
-It is **not** imported by the live v2 repo. Live architectures (SGS, PCS, UAS)
-and the upcoming `production/` CLI live outside this folder. Do not add
-cross-imports in either direction.
+Live code does not import this folder. `signal_gated_search/`, `parallel_channel_search/`, `unified_adaptive_search/`, and `production/` live outside it. Do not add cross-imports in either direction. The live batch command is `python -m production`.
 
 ## What is in here
 
