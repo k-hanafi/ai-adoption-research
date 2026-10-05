@@ -25,7 +25,7 @@ from evals.tune.artifacts import (
 )
 from evals.tune.dashboard import render_tuning_dashboard
 from evals.tune.matrix import stage_a_screen_arms
-from unified_adaptive_search.agent_call import require_api_key
+from agent_api.client import require_api_key
 
 
 def run_tuning(

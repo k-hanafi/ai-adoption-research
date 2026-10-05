@@ -1,8 +1,6 @@
-"""SGS Agent API request builders and live scout/dig calls.
+"""SGS request builders and the presence-scout parse.
 
-Scout calls use stock `preset=low`. Dig calls use explicit Luna knobs like PCS.
-Digs reuse the PCS live executor (same findings schema). Scouts parse presence JSON.
-Snapshots reuse the PCS helper so dry traces share one shape.
+Scout calls use preset low and web_search only. Dig calls use the shared findings client.
 """
 
 from __future__ import annotations
@@ -10,12 +8,16 @@ from __future__ import annotations
 import json
 from typing import Any, Optional
 
-from contracts.types import CompanyInput
-from src.keys import APIKeys
-from parallel_channel_search.agent_call import (
+from agent_api.client import (
+    create_response,
+    extract_content_text,
+    extract_json_object,
     execute_agent_call,
-    request_snapshot,
+    require_api_key,
+    web_search_tool,
 )
+from contracts.types import CompanyInput
+from parallel_channel_search.agent_call import request_snapshot
 from signal_gated_search.channels import (
     DEFAULT_DIG_MAX_STEPS,
     DEFAULT_DIG_MODEL,
@@ -32,28 +34,6 @@ from signal_gated_search.prompting import (
 
 DEFAULT_TIMEOUT = 300.0
 
-# Same ladder as PCS. Digs freeze search=medium; kept for explicit kwargs.
-_WEB_SEARCH_DEPTH: dict[str, dict[str, Any]] = {
-    "low": {
-        "search_context_size": "medium",
-        "max_tokens": 2000,
-        "max_tokens_per_page": 1000,
-        "max_results": 10,
-    },
-    "medium": {
-        "search_context_size": "high",
-        "max_tokens": 4000,
-        "max_tokens_per_page": 2000,
-        "max_results": 20,
-    },
-    "high": {
-        "search_context_size": "high",
-        "max_tokens": 8000,
-        "max_tokens_per_page": 4000,
-        "max_results": 50,
-    },
-}
-
 
 def build_scout_request_kwargs(
     company: CompanyInput,
@@ -62,7 +42,6 @@ def build_scout_request_kwargs(
     preset: str = DEFAULT_SCOUT_PRESET,
     max_steps: Optional[int] = DEFAULT_SCOUT_MAX_STEPS,
 ) -> dict[str, Any]:
-    """Build kwargs for one presence-scout Agent API call."""
     kwargs: dict[str, Any] = {
         "preset": preset,
         "input": build_scout_prompt(company, channel_id),
@@ -83,39 +62,19 @@ def build_dig_request_kwargs(
     reasoning_effort: str,
     web_search_depth: str = DEFAULT_DIG_WEB_SEARCH_DEPTH,
 ) -> dict[str, Any]:
-    """Build kwargs for one cold-start dig Agent API call (no scout URLs)."""
-    depth = (web_search_depth or DEFAULT_DIG_WEB_SEARCH_DEPTH).strip().lower()
-    if depth not in _WEB_SEARCH_DEPTH:
-        known = ", ".join(sorted(_WEB_SEARCH_DEPTH))
-        raise ValueError(f"Unknown web_search_depth {web_search_depth!r}. Choose: {known}")
-
     kwargs: dict[str, Any] = {
         "model": model,
         "input": build_dig_prompt(company, channel_id),
         "response_format": DIG_RESPONSE_SCHEMA,
         "reasoning": {"effort": reasoning_effort},
         "tools": [
-            {"type": "web_search", **_WEB_SEARCH_DEPTH[depth]},
+            web_search_tool(web_search_depth, fallback=DEFAULT_DIG_WEB_SEARCH_DEPTH),
             {"type": "fetch_url"},
         ],
     }
     if max_steps:
         kwargs["max_steps"] = max_steps
     return kwargs
-
-
-def require_api_key(api_key: Optional[str] = None) -> str:
-    """Resolve Perplexity key from arg, credentials file, or env. Refuse if missing."""
-    if api_key:
-        return api_key
-    key = APIKeys().perplexity
-    if not key:
-        raise RuntimeError(
-            "Perplexity API key required for live Signal Gated Search. "
-            "Set credentials/perplexity_api_key.txt or PERPLEXITY_API_KEY. "
-            "Use dry_run=True to build request snapshots without calling the API."
-        )
-    return key
 
 
 def execute_dig_call(
@@ -125,53 +84,12 @@ def execute_dig_call(
     api_key: Optional[str] = None,
     timeout: float = DEFAULT_TIMEOUT,
 ) -> dict[str, Any]:
-    """One sync dig call. Reuses PCS parse/metering (same findings schema)."""
     return execute_agent_call(
         request_kwargs,
         channel_id=channel_id,
         api_key=api_key,
         timeout=timeout,
     )
-
-
-def _extract_text_fallback(output: list) -> str:
-    """Walk output items for text when `output_text` is empty (PCS/UAS pattern)."""
-    texts: list[str] = []
-    for item in output or []:
-        for part in getattr(item, "content", None) or []:
-            text = getattr(part, "text", None)
-            if text:
-                texts.append(text)
-    return "".join(texts)
-
-
-def _extract_json_object(text: str) -> str:
-    start = text.find("{")
-    if start == -1:
-        return text
-    depth = 0
-    in_string = False
-    escape = False
-    for i in range(start, len(text)):
-        ch = text[i]
-        if escape:
-            escape = False
-            continue
-        if ch == "\\":
-            escape = True
-            continue
-        if ch == '"':
-            in_string = not in_string
-            continue
-        if in_string:
-            continue
-        if ch == "{":
-            depth += 1
-        elif ch == "}":
-            depth -= 1
-            if depth == 0:
-                return text[start : i + 1]
-    return text[start:]
 
 
 def _usage_meta(response: Any, *, channel_id: str) -> dict[str, Any]:
@@ -211,14 +129,7 @@ def execute_scout_call(
     api_key: Optional[str] = None,
     timeout: float = DEFAULT_TIMEOUT,
 ) -> dict[str, Any]:
-    """One sync presence-scout call. Returns bin/urls plus usage."""
-    from perplexity import Perplexity
-
-    key = require_api_key(api_key)
-    client = Perplexity(api_key=key, max_retries=0)
-    create_kwargs = dict(request_kwargs)
-    create_kwargs["timeout"] = timeout
-    response = client.responses.create(**create_kwargs)
+    response = create_response(request_kwargs, api_key=api_key, timeout=timeout)
     meta = _usage_meta(response, channel_id=channel_id)
 
     if getattr(response, "status", None) == "failed":
@@ -229,7 +140,7 @@ def execute_scout_call(
 
     content = (getattr(response, "output_text", None) or "").strip()
     if not content:
-        content = _extract_text_fallback(list(getattr(response, "output", None) or [])).strip()
+        content = extract_content_text(list(getattr(response, "output", None) or [])).strip()
     if not content:
         meta["error"] = (
             f"Empty Agent API scout response (model={meta['model_used']}, "
@@ -242,19 +153,15 @@ def execute_scout_call(
         try:
             parsed = json.loads(content)
         except json.JSONDecodeError:
-            parsed = json.loads(_extract_json_object(content))
+            parsed = json.loads(extract_json_object(content))
         if not isinstance(parsed, dict):
-            meta["error"] = (
-                f"JSON root must be an object, got {type(parsed).__name__}"
-            )
+            meta["error"] = f"JSON root must be an object, got {type(parsed).__name__}"
             return meta
         meta["evidence_bin"] = str(parsed.get("evidence_bin") or "none")
         urls = parsed.get("urls") or []
         snippets = parsed.get("snippets") or []
         meta["urls"] = [str(u) for u in urls] if isinstance(urls, list) else []
-        meta["snippets"] = (
-            [str(s) for s in snippets] if isinstance(snippets, list) else []
-        )
+        meta["snippets"] = [str(s) for s in snippets] if isinstance(snippets, list) else []
         meta["rationale"] = str(parsed.get("rationale") or "")
     except json.JSONDecodeError as exc:
         meta["error"] = f"JSON parse error: {exc}"

@@ -41,6 +41,8 @@ Human: skim this file when writing the paper/portfolio narrative. Agents: update
 - Agent brief: `AGENTS.md`
 - Packaging: `pyproject.toml`, `.github/workflows/pytest.yml`
 - API keys: `src/keys.py`
+- Perplexity client: `agent_api/client.py`
+- Findings schema: `contracts/schema.py`
 - Stage 3 package: `citation_verification/` (production; not under `evals/`)
 - Stage 3 judge prompt: `prompts/citation_verification/judge.txt`
 - Stage 3 CLI outputs: `python -m citation_verification --output-jsonl` / `--output-csv`
@@ -1592,5 +1594,19 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 **Evidence:** Callers are the three `agent_call.py` modules, `citation_verification/judge.py`, and `src/stage_1/`. Test: `tests/test_keys.py`.
 
 **Alternatives rejected:** Re-exporting `APIKeys` from `src/config.py`. Editing `legacy_agent_march_2026/src/config.py` to match.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.
+
+---
+
+## 2026-10-05: One Perplexity client and one findings schema
+
+**Decision:** `agent_api/client.py` owns the search-depth ladder, JSON extract, Perplexity key check, and `execute_agent_call`. `contracts/schema.py` owns `RESPONSE_SCHEMA`. PCS, SGS digs, and UAS call that client. SGS scouts call `create_response` in the same module. A JSON parse failure keeps the metered cost. UAS search depth stays `low`. SGS scouts stay preset `low` with `web_search` only. PCS search depth stays `medium`. The three `run()` functions stay separate.
+
+**Why:** The three packages each carried a copy of the same call. A fix to cost handling or the schema had to land three times.
+
+**Evidence:** `tests/test_agent_client.py`. `DIG_RESPONSE_SCHEMA is RESPONSE_SCHEMA`.
+
+**Alternatives rejected:** Three switch pull requests. Changing UAS depth to `medium`. Merging the three `run()` functions.
 
 **Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.

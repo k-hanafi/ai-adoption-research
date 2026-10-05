@@ -32,6 +32,8 @@ Citation checks use `python -m production verify` and `python -m citation_verifi
 | `src/keys.py` | API keys. Importing it does not create output directories. |
 | `src/config.py` | Paths and processing settings. Importing it creates output directories. |
 | `src/stage_1/` | Website check and priority score |
+| `agent_api/` | The one Perplexity Agent API client |
+| `contracts/schema.py` | The shared findings JSON schema |
 | `signal_gated_search/` | Default Stage 2 architecture |
 | `parallel_channel_search/` | Three equal-depth channels |
 | `unified_adaptive_search/` | One call per company. Search depth stays `low`. |
