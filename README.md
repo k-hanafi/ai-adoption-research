@@ -1,6 +1,6 @@
 # AI adoption research
 
-This repo measures generative-AI use inside startups. The live batch command is `python -m production`. `python -m` runs that module with the interpreter that has this checkout installed. The default architecture is Signal Gated Search (`sgs`).
+This repo measures generative-AI use inside startups. The live batch command is `python -m production`. Run it from the checkout root. `python -m` runs that module with the same interpreter you use for the install below. The default architecture is Signal Gated Search (`sgs`). The editable install pulls dependencies. It does not install these packages. `pyproject.toml` sets `packages = []`.
 
 The March 2026 production run is frozen in `legacy_agent_march_2026/`. Live code does not import that folder.
 
@@ -15,16 +15,16 @@ python -m pytest -q
 
 ## Run a batch
 
-A live `run` refuses to start unless you pass `--limit N` or `--all`.
+`dry-run`, `run`, and `verify` each require `--limit N` or `--all`. `verify --status` does not. The default company file, `crunchbase_data/stage2_input_dataset_p4_p5.jsonl`, is local and is not in git. The commands below use the fictional sample.
 
 ```bash
-python -m production dry-run --limit 1
-python -m production run --limit 1
-python -m production status
-python -m production dedupe
+python -m production dry-run --limit 1 --dataset crunchbase_data/sample/stage2_input.sample.jsonl
+python -m production status --dataset crunchbase_data/sample/stage2_input.sample.jsonl
 ```
 
-`--architecture` accepts `sgs`, `pcs`, and `uas`. The default is `sgs`. Writes go to `outputs/prod/`.
+A live `run` uses the same `--limit` and `--dataset` flags on the local company file. `python -m production dedupe` rewrites `findings_deduplicated.csv` from an existing `findings.csv`. Do not pass `--all` for a first run.
+
+`--architecture` accepts `sgs`, `pcs`, and `uas`. The default is `sgs`. Writes go to `outputs/prod/<architecture>/`. `dry-run` writes nothing.
 
 Signal Gated Search scouts use preset `low` and `web_search` only. Parallel Channel Search search depth is `medium`. Unified Adaptive Search search depth stays `low`.
 
@@ -32,12 +32,14 @@ Signal Gated Search scouts use preset `low` and `web_search` only. Parallel Chan
 
 The batch command is `python -m production verify`. One findings file goes through `python -m citation_verification --findings path.jsonl`. `python -m evals run-verification` and `python -m evals run-benchmarks` exit 2. The bake-off was skipped.
 
+Both commands need `outputs/prod/sgs/findings_deduplicated.csv`. A fresh checkout does not have that file.
+
 ```bash
 python -m production verify --limit 1
 python -m production verify --limit 1 --live
 ```
 
-`verify` does not call a paid API until you pass `--live`. An unread page stays null.
+`verify` does not call a paid API until you pass `--live`. An unread page stays null on the verdict. `findings_verified.csv` leaves that cell blank.
 
 ## Plan spend for Signal Gated Search
 
@@ -47,7 +49,7 @@ Plan a full SGS batch at about $0.16 per company. The hill-climb 20 mean was $0.
 
 ## March 2026 run
 
-That run produced 2,062 findings. The dashboard is [`legacy_agent_march_2026/presentation/production_results.html`](legacy_agent_march_2026/presentation/production_results.html). HTML files in `presentation/` are earlier decks from that period.
+That run produced 2,062 findings. The dashboard is [`legacy_agent_march_2026/presentation/production_results.html`](legacy_agent_march_2026/presentation/production_results.html). HTML files in `presentation/` are proposal and stage decks from January through March 2026. They are separate from that dashboard.
 
 ## Where the code lives
 
