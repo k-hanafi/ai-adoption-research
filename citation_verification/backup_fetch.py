@@ -4,19 +4,18 @@ from __future__ import annotations
 
 import os
 import re
-from pathlib import Path
 from typing import Any, Mapping, Optional, Sequence
 
 import httpx
 
 from citation_verification import config
 from citation_verification.fetch import FetchResult
+from src.keys import APIKeys
 from citation_verification.limits import browser_slots, call_with_429_retry, tavily_limiter
 from citation_verification.text import cap_snippet
 
 _SCRIPT_STYLE = re.compile(r"<(script|style)[^>]*>.*?</\1>", re.IGNORECASE | re.DOTALL)
 _TAG = re.compile(r"<[^>]+>")
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 def execute_backup_chain(
@@ -60,7 +59,7 @@ def execute_tavily_extract(
     api_key: Optional[str] = None,
 ) -> FetchResult:
     """URL-in, clean text-out. Paid backup only. Not Tavily Search."""
-    key = api_key or _tavily_api_key()
+    key = api_key or APIKeys().tavily
     if not key:
         return FetchResult(
             url=url,
@@ -287,16 +286,6 @@ def _tavily_cost(payload: dict[str, Any]) -> float:
     if isinstance(cost, (int, float)):
         return float(cost)
     return 0.0
-
-
-def _tavily_api_key() -> str:
-    env = (os.environ.get("TAVILY_API_KEY") or "").strip()
-    if env:
-        return env
-    path = PROJECT_ROOT / "credentials" / "tavily_api_key.txt"
-    if path.is_file():
-        return path.read_text(encoding="utf-8").strip()
-    return ""
 
 
 def _html_to_text(html: str) -> str:

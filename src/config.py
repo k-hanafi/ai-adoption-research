@@ -1,8 +1,6 @@
-"""
-Configuration & Constants
+"""Paths and processing settings.
 
-All magic numbers, thresholds, and settings live here.
-Single source of truth for the entire pipeline.
+Importing this module creates output directories. API keys live in src.keys.
 """
 
 from dataclasses import dataclass

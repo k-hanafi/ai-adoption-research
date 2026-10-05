@@ -1,5 +1,3 @@
-"""API keys from credentials/*.txt, then the matching environment variable."""
-
 from __future__ import annotations
 
 import os

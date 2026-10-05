@@ -12,6 +12,7 @@ import logging
 from typing import Any, Optional
 
 from contracts.types import CompanyInput, Finding
+from src.keys import APIKeys
 from unified_adaptive_search.prompting import RESPONSE_SCHEMA, build_company_prompt
 
 logger = logging.getLogger("unified_adaptive_search.agent_call")
@@ -158,8 +159,6 @@ def require_api_key(api_key: Optional[str] = None) -> str:
     """Resolve Perplexity key from arg, credentials file, or env. Refuse if missing."""
     if api_key:
         return api_key
-    from src.keys import APIKeys
-
     key = APIKeys().perplexity
     if not key:
         raise RuntimeError(

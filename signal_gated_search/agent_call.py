@@ -11,6 +11,7 @@ import json
 from typing import Any, Optional
 
 from contracts.types import CompanyInput
+from src.keys import APIKeys
 from parallel_channel_search.agent_call import (
     execute_agent_call,
     request_snapshot,
@@ -107,8 +108,6 @@ def require_api_key(api_key: Optional[str] = None) -> str:
     """Resolve Perplexity key from arg, credentials file, or env. Refuse if missing."""
     if api_key:
         return api_key
-    from src.keys import APIKeys
-
     key = APIKeys().perplexity
     if not key:
         raise RuntimeError(
