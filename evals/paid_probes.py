@@ -20,6 +20,14 @@ from evals.paths import (
 )
 
 TIMEOUT_S = 600.0
+_FAST_SCOUT_DIGS = (
+    "Scoreboard used fast scouts and digs at 10 steps with search depth low. "
+    "The package now uses scout preset low and digs at 50 steps with search depth medium."
+)
+_SHALLOW_DIGS = (
+    "Scoreboard digs are 10 steps with search depth low. "
+    "The package digs are 50 steps with search depth medium."
+)
 
 _PANELS = {
     "hillclimb": HILLCLIMB_PANEL_PATH,
@@ -105,6 +113,7 @@ class Probe:
     scout_preset: Optional[str] = None
     dig_effort: Optional[str] = None
     check_sgs_defaults: bool = False
+    live_block: Optional[str] = None
 
     @property
     def out_dir(self) -> Path:
@@ -173,6 +182,8 @@ PROBES: dict[str, Probe] = {
             workers=1,
             companies=_SMOKE_5,
             expected=5,
+            timeout=300.0,
+            live_block=_FAST_SCOUT_DIGS,
         ),
         _probe(
             name="sgs_smoke_5co_low_scouts",
@@ -180,7 +191,9 @@ PROBES: dict[str, Probe] = {
             workers=1,
             companies=_SMOKE_5,
             expected=5,
+            timeout=600.0,
             scout_preset="low",
+            live_block=_SHALLOW_DIGS,
         ),
         _probe(
             name="sgs_smoke_covertree_tern_v2",
@@ -188,6 +201,8 @@ PROBES: dict[str, Probe] = {
             workers=1,
             companies=_smoke(1314132, 26492430),
             expected=2,
+            timeout=300.0,
+            live_block=_FAST_SCOUT_DIGS,
         ),
         _probe(
             name="sgs_hillclimb_20_high",
@@ -195,6 +210,7 @@ PROBES: dict[str, Probe] = {
             workers=4,
             panel="hillclimb",
             expected=20,
+            live_block=_FAST_SCOUT_DIGS,
         ),
         _probe(
             name="sgs_hillclimb_20_medium",
@@ -203,6 +219,7 @@ PROBES: dict[str, Probe] = {
             panel="hillclimb",
             expected=20,
             dig_effort="medium",
+            live_block=_FAST_SCOUT_DIGS,
         ),
         _probe(
             name="sgs_hillclimb_20_matched",
@@ -588,6 +605,10 @@ def main(argv: Optional[list[str]] = None) -> int:
         print("error: name a probe. Choose: " + ", ".join(sorted(PROBES)), file=sys.stderr)
         return 2
     probe = PROBES[args.probe]
+    if probe.live_block:
+        print(describe(probe), file=sys.stderr)
+        print(f"error: {probe.live_block}", file=sys.stderr)
+        return 2
     if not args.live:
         print(describe(probe), file=sys.stderr)
         print("error: pass --live to call the Agent API. This command does not spend money otherwise.", file=sys.stderr)

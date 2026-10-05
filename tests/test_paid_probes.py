@@ -1,5 +1,3 @@
-"""Paid-probe catalog: error-field retries, and no spend without --live."""
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -8,6 +6,7 @@ import pytest
 
 from evals.paid_probes import (
     PROBES,
+    _write_result,
     describe,
     dig_effort_override,
     is_complete_success,
@@ -70,6 +69,57 @@ def test_resume_skips_only_error_free_json() -> None:
     ) is False
     assert is_complete_success(None) is False
     assert is_complete_success({}) is False
+
+
+def test_smoke_timeouts_match_the_scripts() -> None:
+    assert PROBES["sgs_smoke_5co"].timeout == 300.0
+    assert PROBES["sgs_smoke_covertree_tern_v2"].timeout == 300.0
+    assert PROBES["sgs_smoke_5co_low_scouts"].timeout == 600.0
+    assert PROBES["pcs_hillclimb_20"].timeout == 300.0
+
+
+def test_old_sgs_leashes_refuse_live(monkeypatch, capsys: pytest.CaptureFixture[str]) -> None:
+    blocked = {
+        "sgs_hillclimb_20_high",
+        "sgs_hillclimb_20_medium",
+        "sgs_smoke_5co",
+        "sgs_smoke_5co_low_scouts",
+        "sgs_smoke_covertree_tern_v2",
+    }
+    assert {name for name, probe in PROBES.items() if probe.live_block} == blocked
+
+    def _boom(*_args, **_kwargs):
+        raise AssertionError("execute must not run")
+
+    monkeypatch.setattr("evals.paid_probes.execute", _boom)
+    assert main(["sgs_hillclimb_20_high", "--live"]) == 2
+    err = capsys.readouterr().err
+    assert "fast scouts" in err
+    assert "50 steps" in err
+
+
+def test_keep_success_does_not_overwrite(tmp_path: Path) -> None:
+    from threading import Lock
+
+    result_path = tmp_path / "1.json"
+    result_path.write_text('{"error": null, "findings_count": 3}\n', encoding="utf-8")
+    summary = tmp_path / "summary.jsonl"
+    summary.write_text('{"rcid": 1}\n', encoding="utf-8")
+    _write_result(
+        result_path,
+        {"error": "APITimeoutError: Request timed out."},
+        {"rcid": 1, "name": "Jam", "error": "APITimeoutError: Request timed out."},
+        summary,
+        Lock(),
+    )
+    assert json_text(result_path) == '{"error": null, "findings_count": 3}\n'
+    assert summary.read_text(encoding="utf-8") == '{"rcid": 1}\n'
+    backups = list(tmp_path.glob("1.*.failed.json"))
+    assert len(backups) == 1
+
+
+def json_text(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
 
 
 def test_catalog_matches_scoreboards() -> None:

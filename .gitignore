@@ -54,8 +54,6 @@ outputs/**/*.html
 outputs/**/latest
 !outputs/.gitkeep
 !outputs/evals/runs/.gitkeep
-# Paid Stage 2 scoreboards stay in git. Per-company traces stay local.
-# The runner is evals/paid_probes.py.
 !outputs/stage2/test_runs/**/summary.jsonl
 logs/*.log
 checkpoints/*.json

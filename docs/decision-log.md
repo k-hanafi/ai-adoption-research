@@ -1617,7 +1617,7 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 
 ## 2026-10-05: One paid-probe script
 
-**Decision:** Delete the thirteen `run_*.py` scripts under `outputs/stage2/test_runs/`. `evals/paid_probes.py` is the re-run entry. Each probe keeps its panel, worker count, effort, and output folder. Every `summary.jsonl` stays tracked. The command exits 2 unless you pass a probe name and `--live`. Resume skips a company only when that company's JSON has an empty `error`. A later failure does not replace a successful JSON. The medium-dig probe patches `DIG_EFFORT_BY_COUNT` in memory for that run, then restores `high`.
+**Decision:** Delete the thirteen `run_*.py` scripts under `outputs/stage2/test_runs/`. `evals/paid_probes.py` is the re-run entry. Each probe keeps its panel, worker count, effort, and output folder. Every `summary.jsonl` stays tracked. The command exits 2 unless you pass a probe name and `--live`. Five SGS folders still exit 2 with `--live`, because their scoreboards used fast scouts or digs at 10 steps and search depth low, and the package now uses scout preset low and digs at 50 steps with search depth medium. Resume skips a company only when that company's JSON has an empty `error`. A later failure does not replace a successful JSON. The medium-dig probe still records a `medium` dig effort, and it is one of the five that refuse `--live`.
 
 **Why:** The scripts were copies of one loop. The scoreboards are the measurement. A bare command must not spend money.
 
