@@ -1,6 +1,8 @@
 # AI adoption research
 
-This repo measures generative-AI use inside startups. The live batch command is `python -m production`. Run it from the checkout root. `python -m` runs that module with the same interpreter you use for the install below. The default architecture is Signal Gated Search (`sgs`). The editable install pulls dependencies. It does not install these packages. `pyproject.toml` sets `packages = []`.
+This repo measures generative-AI use inside startups. Low-signal data filtering lives in `src/stage_1/`. The research agents are `signal_gated_search/`, `parallel_channel_search/`, and `unified_adaptive_search/`. Citation verification lives in `citation_verification/`.
+
+The live batch command is `python -m production`. Run it from the checkout root. `python -m` runs that module with the same interpreter you use for the install below. The default research agent is Signal Gated Search (`sgs`). The editable install pulls dependencies. It does not install these packages. `pyproject.toml` sets `packages = []`.
 
 ## Install and test
 
@@ -49,15 +51,15 @@ Plan a full SGS batch at about $0.16 per company. The hill-climb 20 mean was $0.
 
 | Path | Role |
 |---|---|
-| `production/` | Batch runner |
-| `signal_gated_search/` | Default Stage 2 architecture |
-| `parallel_channel_search/` | Three equal-depth channels |
-| `unified_adaptive_search/` | One call per company |
+| `production/` | Batch runner for the research agents |
+| `signal_gated_search/` | Research agent. Default for the batch. |
+| `parallel_channel_search/` | Research agent. Three equal-depth channels. |
+| `unified_adaptive_search/` | Research agent. One call per company. |
 | `agent_api/` | Perplexity client |
 | `contracts/schema.py` | Findings schema |
 | `src/keys.py` | API keys. Importing it does not create output directories. |
-| `src/stage_1/` | Website check and priority score |
-| `citation_verification/` | Page fetch and citation judge |
+| `src/stage_1/` | Low-signal data filtering. Website check and priority score. |
+| `citation_verification/` | Citation verification. Page fetch and judge. |
 | `evals/` | Tuning, cost preview, and paid-probe re-runs |
 
 The proposal and stage decks under `presentation/` are not in git.

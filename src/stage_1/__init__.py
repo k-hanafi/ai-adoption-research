@@ -1,14 +1,7 @@
-"""
-Stage 1: Presence Filter
+"""Low-signal data filtering.
 
-Gathers general company intelligence via web search and predicts
-research priority for subsequent deep research stages.
-
-Components:
-    1. website.py    — Website health checks
-    2. tavily.py     — Tavily web search
-    3. classifier.py — GPT-5-nano research priority classification
-    4. run_tavily_pass.py / run_gpt_pass.py — Production batch runners
+Website check, Tavily search, and a priority score. The batch runners are
+run_tavily_pass.py and run_gpt_pass.py.
 """
 
 from .website import WebsiteStatus, check_website, check_websites_batch

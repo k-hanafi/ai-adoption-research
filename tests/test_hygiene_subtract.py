@@ -109,7 +109,9 @@ def test_unread_knobs_are_gone() -> None:
 def test_agents_md_names_the_live_command() -> None:
     text = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
     assert "python -m production" in text
-    assert "default architecture is `sgs`" in text
+    assert "default research agent is `sgs`" in text
+    assert "Low-signal data filtering" in text
+    assert "Citation verification" in text
     assert "signal_gated_search" in text
     assert "parallel_channel_search" in text
     assert "unified_adaptive_search" in text

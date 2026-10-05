@@ -4,6 +4,9 @@ from pathlib import Path
 def test_readme_points_at_the_live_commands() -> None:
     text = Path("README.md").read_text(encoding="utf-8")
     assert "python -m production" in text
+    assert "Low-signal data filtering" in text
+    assert "research agents" in text
+    assert "Citation verification" in text
     assert "Stage 3 verification remain stubs" not in text
     assert "legacy_agent_march_2026" not in text
     assert "$0.16" in text

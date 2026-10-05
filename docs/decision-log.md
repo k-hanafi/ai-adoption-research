@@ -45,7 +45,8 @@ Human: skim this file when writing the paper/portfolio narrative. Agents: update
 - API keys: `src/keys.py`
 - Perplexity client: `agent_api/client.py`
 - Findings schema: `contracts/schema.py`
-- Stage 3 package: `citation_verification/` (production; not under `evals/`)
+- Names: low-signal data filtering is `src/stage_1/`. Research agents are `signal_gated_search/`, `parallel_channel_search/`, and `unified_adaptive_search/`. Citation verification is `citation_verification/`.
+- Citation verification package: `citation_verification/` (production; not under `evals/`)
 - Stage 3 judge prompt: `prompts/citation_verification/judge.txt`
 - Stage 3 CLI outputs: `python -m citation_verification --output-jsonl` / `--output-csv`
 - Stage 3 gold e2e: `outputs/stage3/smokes/20260815_2100_gold_e2e/`
@@ -1681,5 +1682,19 @@ Paid `--limit 400 --concurrency 400` from this worktree onto live `outputs/prod`
 **Evidence:** `tests/test_march_reference_path.py`. `prompts/stage_2_perplexity_prompt.txt`. `evals/paths.py` `MARCH_STAGE2_JSONL`.
 
 **Alternatives rejected:** Keeping the snapshot folder. Moving `prompts/stage_2_perplexity_prompt.txt` out of the live tree. Rewriting git history.
+
+**Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.
+
+---
+
+## 2026-10-05: Name the three pipeline parts
+
+**Decision:** Call `src/stage_1/` low-signal data filtering. Call `signal_gated_search`, `parallel_channel_search`, and `unified_adaptive_search` the research agents. Call `citation_verification/` citation verification. The paths stay as they are.
+
+**Why:** Khaled named the three parts on 2026-10-05. A folder rename would change every import and every `python -m` command.
+
+**Evidence:** `README.md`. `AGENTS.md`. `src/stage_1/__init__.py`. `citation_verification/__init__.py`.
+
+**Alternatives rejected:** Renaming `src/stage_1/` to a new package. Moving the research agents under `src/`.
 
 **Open follow-ups:** Do not merge until Khaled asks. No `LICENSE` file until Khaled names one. Ask Jan before any `git filter-repo`.
