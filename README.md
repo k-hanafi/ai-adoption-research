@@ -1,67 +1,107 @@
 # AI adoption research
 
-This repo measures generative-AI use inside startups. Low-signal data filtering lives in `src/stage_1/`. The research agents are `signal_gated_search/`, `parallel_channel_search/`, and `unified_adaptive_search/`. Citation verification lives in `citation_verification/`.
+This repo is part of the paper: [*Prompted to Start: How Generative AI is Transforming Entrepreneurship*](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5749564)
 
-The live batch command is `python -m production`. Run it from the checkout root. `python -m` runs that module with the same interpreter you use for the install below. The default research agent is Signal Gated Search (`sgs`). The editable install pulls dependencies. It does not install these packages. `pyproject.toml` sets `packages = []`.
+Measuring a company’s internal AI adoption is difficult to measure from public sources. Aggregating this data across the economy is even harder. This project is a deep research harness specialized in producing economic datasets of enterprise AI adoption. It produced 30k+ findings from a sample of 44k startups, supporting research presented at NBER conferences. The harness combines public-information signal screening, specialized research agents, and independent citation verification. Three agentic architectures and an eval suite explore how to<br>1. Find sparsely documented evidence by applying steering guardrails.<br>2. Optimize deep research inference expenditure at scale. <br>3. Verify claims and identify hallucinations supported with logprob confidence
 
-## Install and test
+- [Production results](#production-results)
+- [How it works](#how-it-works)
+- [Multi-agent architecture](#multi-agent-architecture)
+- [Citation verification agent](#citation-verification-agent)
+- [How to use](#how-to-use)
 
-```bash
-python -m pip install -e ".[dev]"
-python -m pytest -q
+## Production results
+
+The search ran in August 2026 using the Signal Gated Search architecture.
+
+| Output | Count |
+| --- | --- |
+| Starting sample | 44,387 U.S companies from crunchbase and pitchbook |
+| After signal screening | 9,420 companies |
+| Candidate ai-adoption evidence records | 30,062 |
+| Verified findings | 95% with 98.4% average token prob confidence |
+| Hallucinated findings | 3% with 97.5% average token prob confidence |
+
+## How it works
+
+```mermaid
+flowchart TD
+    A["Input company profile"]
+    A --> B["Low-signal filtering:<br>Compare input profile as a proxy for online presence"]
+    B --> C["Evals and A/B tests"]
+
+    C --> U["Unified Adaptive Search<br>UAS"]
+    C --> P["Parallel Channel Search<br>PCS"]
+    C --> S["Signal Gated Search<br>SGS"]
+
+    U --> D["Run winning architecture in <br>production"]
+    P --> D
+    S --> D
+
+    D --> E["Judge LLM citation checks"]
 ```
 
-`python -m pip` uses that same interpreter.
+## Multi-agent architecture
 
-## Run a batch
+```mermaid
+flowchart TD
+    A["Input company profile"]
 
-`dry-run`, `run`, and `verify` each require `--limit N` or `--all`. `verify --status` does not. The default company file, `crunchbase_data/stage2_input_dataset_p4_p5.jsonl`, is local and is not in git. The commands below use the fictional sample.
+    A --> SJ["Scout agent<br>Job postings<br>2 steps"]
+    A --> SO["Scout agent<br>Firm-owned sources<br>2 steps"]
+    A --> ST["Scout agent<br>Third-party sources<br>2 steps"]
 
-```bash
-python -m production dry-run --limit 1 --dataset crunchbase_data/sample/stage2_input.sample.jsonl
-python -m production status --dataset crunchbase_data/sample/stage2_input.sample.jsonl
+    SJ -->|"Evidence threshold met?"| DJ["Dig agent<br>Job postings<br>Up to 50 steps"]
+    SO -->|"Evidence threshold met?"| DO["Dig agent<br>Firm-owned sources<br>Up to 50 steps"]
+    ST -->|"Evidence threshold met?"| DT["Dig agent<br>Third-party sources<br>Up to 50 steps"]
+
+    DJ --> M["Merge and deduplicate findings"]
+    DO --> M
+    DT --> M
+    M --> R["Citation judge on research output"]
+
+    classDef scout fill:#fbf1d8,stroke:#37688b,color:#111;
+    classDef dig fill:#edf4fb,stroke:#37688b,color:#111;
+    class SJ,SO,ST scout;
+    class DJ,DO,DT dig;
 ```
 
-A live `run` uses the same `--limit` and `--dataset` flags on the local company file. `python -m production dedupe` rewrites `findings_deduplicated.csv` from an existing `findings.csv`. Do not pass `--all` for a first run.
+**Signal Gated Search (SGS)** is the production architecture. It separates research into three evidence channels: job postings, firm-owned sources, and third-party sources. Each channel gets a short scout followed by an optional full search, or dig.
 
-`--architecture` accepts `sgs`, `pcs`, and `uas`. The default is `sgs`. Writes go to `outputs/prod/<architecture>/`. `dry-run` writes nothing.
+Scouts assess whether the channel contains promising public material. They return a presence rating and URLs; code launches a dig only for moderate or strong material with at least one URL. The scout does not need to prove internal AI use. Each dig searches afresh from the company identity and assigned channel, without inheriting the scout’s links or snippets.
 
-Signal Gated Search scouts use preset `low` and `web_search` only. Parallel Channel Search search depth is `medium`. Unified Adaptive Search search depth stays `low`.
+Scouts use web search only, preset `low`, and two steps. Digs use GPT-5.6 Luna through the Perplexity Agent API, search and page retrieval, up to 50 steps, `medium` search depth, and `high` reasoning effort. Findings are merged and deduplicated across channels. A company can receive zero to three digs.
 
-## Check a citation
+The gate directs expensive searches toward researchable channels. Scouts still add overhead: when all three channels pass, SGS pays for three digs plus the screening calls.
 
-The batch command is `python -m production verify`. One findings file goes through `python -m citation_verification --findings path.jsonl`. `python -m evals run-verification` and `python -m evals run-benchmarks` exit 2. The bake-off was skipped.
+**PCS and UAS simplify this orchestration:**
 
-Both commands need `outputs/prod/sgs/findings_deduplicated.csv`. A fresh checkout does not have that file.
+- **Parallel Channel Search** removes the scouts and runs one specialized agent per search path. This preserves explicit channel coverage but costs roughly 1.5x the inference in production, as search paths are always explored even if a screener would find unlikely to return findings.
+- **Unified Adaptive Search** is the single-agent system alternative, removing channel specific subagents and model escalation mechanism. One model is given complete freedom in its search path and tool call iterations.
 
-```bash
-python -m production verify --limit 1
-python -m production verify --limit 1 --live
-```
+**Code:** `signal_gated_search/`, `parallel_channel_search/`, `unified_adaptive_search/`, `agent_api/client.py`, and `contracts/schema.py`.
 
-`verify` does not call a paid API until you pass `--live`. An unread page stays null on the verdict. `findings_verified.csv` leaves that cell blank.
+## Citation verification agent
 
-## Plan spend for Signal Gated Search
+The verifier reopens each cited URL using Perplexity, with Tavily Extract and direct HTTP as retrieval fallbacks. A separate judge compares the saved claim with the retrieved page text, without new searches or outside knowledge. Supported claims receive `1`, unsupported claims receive `0`, and unreadable pages or technical failures remain unresolved.
 
-Plan a full SGS batch at about $0.16 per company. The hill-climb 20 mean was $0.171. The skip-50 mean was $0.157. Those scoreboards stay on the machine that ran them.
+**Code:** `citation_verification/` contains retrieval (`fetch.py`, `backup_fetch.py`), text processing (`text.py`), orchestration (`runner.py`), judging (`judge.py`), and log-probability confidence (`confidence.py`); `production/verify.py`
 
-`python -m evals.paid_probes` lists the historical probes and exits 2. It calls the Agent API only when you pass a probe name and `--live`. Five early SGS folders still refuse `--live`, because their scoreboards used an older scout preset or a shallower dig.
+## How to use
 
-## Where the code lives
+| Command | What it does |
+| --- | --- |
+| `python -m production dry-run --limit 1` | Preview the research setup without API calls or output writes. |
+| `python -m production run --limit 1` | Research one company and save candidate findings. |
+| `python -m production status` | Show completed companies, remaining work, errors, and recorded spend. |
+| `python -m production dedupe` | Remove repeated evidence from the saved findings. |
+| `python -m production verify --limit 1 --live` | Reopen one citation and judge whether it supports the claim. Uses paid APIs. |
+| `python -m citation_verification --findings path.jsonl` | Preview citation checks for a standalone findings file. Add `--live` to execute them. |
+| `python -m evals run-benchmarks` | Benchmarks the 3 agent architectures on a sample of input companies. |
+| `python -m evals run-tuning uas --stage screen --live` | Evaluate how different harness configs affect research yield and  cost. |
+| `python -m evals run-verification` | Run citation agent evals. |
+| `python -m evals open-dashboard` | Open evals dashboard. |
 
-| Path | Role |
-|---|---|
-| `production/` | Batch runner for the research agents |
-| `signal_gated_search/` | Research agent. Default for the batch. |
-| `parallel_channel_search/` | Research agent. Three equal-depth channels. |
-| `unified_adaptive_search/` | Research agent. One call per company. |
-| `agent_api/` | Perplexity client |
-| `contracts/schema.py` | Findings schema |
-| `src/keys.py` | API keys. Importing it does not create output directories. |
-| `src/stage_1/` | Low-signal data filtering. Website check and priority score. |
-| `citation_verification/` | Citation verification. Page fetch and judge. |
-| `evals/` | Tuning, cost preview, and paid-probe re-runs |
+Use `--dataset path.jsonl` to choose company inputs. Select SGS, PCS, or UAS with `--architecture sgs|pcs|uas`; SGS is the default. `--limit N` bounds the batch.
 
-The proposal and stage decks under `presentation/` are not in git.
-
-Put keys in `credentials/*.txt` or the matching environment variable. The tracked templates are `credentials/*.txt.template`. A credentials file wins over the environment variable.
+Results live under `outputs/prod/<architecture>/`. The main tables are `findings.csv`, `findings_deduplicated.csv`, and `findings_verified.csv`.
